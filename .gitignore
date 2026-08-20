@@ -20,3 +20,10 @@ env/
 *.swp
 .DS_Store
 Thumbs.db
+
+.playwright-cli/
+runtime/
+analysis/*.apk
+android-helper/build/
+session.json
+*.session.json

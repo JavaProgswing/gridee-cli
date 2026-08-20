@@ -9,7 +9,10 @@ import sys
 import time
 from pathlib import Path
 
+from .api import ApiError, DEFAULT_BASE_URL, default_session_file, run_api, run_auth
+from .booking import BookingError, parse_date, parse_hhmm, run_booking
 from .core import Config, Gridee
+from .scheduler import parse_datetime, run_scheduler
 
 
 class GrideeParser(argparse.ArgumentParser):
@@ -29,6 +32,41 @@ examples:
   gridee reward --target 2000       run ads until the balance reaches 2000
   gridee --device SERIAL reward     target a specific device
 """
+
+
+def add_api_connection_options(parser: argparse.ArgumentParser, *, allow_login: bool = True) -> None:
+    parser.add_argument(
+        "--base-url",
+        default=os.getenv("GRIDEE_BASE_URL", DEFAULT_BASE_URL),
+        help="Gridee API origin (env: GRIDEE_BASE_URL).",
+    )
+    parser.add_argument(
+        "--session-file",
+        type=Path,
+        default=Path(os.getenv("GRIDEE_SESSION_FILE", str(default_session_file()))),
+        help="Saved bearer-session file (env: GRIDEE_SESSION_FILE).",
+    )
+    parser.add_argument("--token", default=os.getenv("GRIDEE_TOKEN"), help="Bearer token (env: GRIDEE_TOKEN).")
+    parser.add_argument(
+        "--token-type",
+        default=os.getenv("GRIDEE_TOKEN_TYPE"),
+        help="Authentication scheme returned by login (default: Bearer).",
+    )
+    parser.add_argument("--api-timeout", type=float, default=30.0, help="HTTP timeout in seconds.")
+    if allow_login:
+        parser.add_argument("--email", default=os.getenv("GRIDEE_EMAIL"), help="Login email (env: GRIDEE_EMAIL).")
+        password = parser.add_mutually_exclusive_group()
+        password.add_argument(
+            "--password",
+            default=os.getenv("GRIDEE_PASSWORD"),
+            help="Login password; secure prompt or --password-stdin is preferred.",
+        )
+        password.add_argument(
+            "--password-stdin",
+            action="store_true",
+            help="Read one password line from stdin.",
+        )
+        parser.add_argument("--no-save", action="store_true", help="Do not save a successful login token.")
 
 
 def make_parser() -> argparse.ArgumentParser:
@@ -164,6 +202,83 @@ def make_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("--startup-delay", type=float, default=4.0,
                    help="Seconds to wait after launching Gridee (default 4).")
+
+    p = sub.add_parser("booking", help="Prepare or submit a parking booking through the Android UI.")
+    p.add_argument("--venue", default="Tech Park Avenue", help="Preferred venue name (fuzzy matched).")
+    p.add_argument("--venue-threshold", type=float, default=0.35, help="Minimum fuzzy-match score.")
+    p.add_argument("--open-at", type=parse_hhmm, default=parse_hhmm("05:00"))
+    p.add_argument("--start", type=parse_hhmm, default=parse_hhmm("08:00"))
+    p.add_argument("--end", type=parse_hhmm, default=parse_hhmm("17:00"))
+    p.add_argument("--date", type=parse_date, help="Booking date (YYYY-MM-DD); defaults automatically.")
+    p.add_argument("--late-buffer-minutes", type=int, default=5)
+    p.add_argument("--venue-timeout", type=float, default=180)
+    p.add_argument("--startup-delay", type=float, default=2.0)
+    p.add_argument("--no-wait", action="store_true", help="Fail instead of waiting for booking opening time.")
+    p.add_argument("--execute", action="store_true", help="Press the final booking button (default is dry run).")
+    p.add_argument("--keep-awake", action="store_true", help="Leave USB stay-awake enabled afterward.")
+
+    auth = sub.add_parser("auth", help="Manage a live API login session.")
+    auth_sub = auth.add_subparsers(dest="auth_command", required=True, metavar="<auth-command>")
+    p = auth_sub.add_parser("login", help="Log in with an email/password and optionally save the bearer token.")
+    add_api_connection_options(p)
+    p.add_argument("--show-token", action="store_true", help="Print the token (normally redacted).")
+    p = auth_sub.add_parser("status", help="Show saved-session status.")
+    add_api_connection_options(p, allow_login=False)
+    p.add_argument("--live", action="store_true", help="Verify the token against /api/oauth2/user.")
+    p = auth_sub.add_parser("logout", help="Remove the locally saved session.")
+    p.add_argument(
+        "--session-file",
+        type=Path,
+        default=Path(os.getenv("GRIDEE_SESSION_FILE", str(default_session_file()))),
+    )
+
+    api = sub.add_parser("api", help="Call documented Gridee HTTP endpoints.")
+    api_sub = api.add_subparsers(dest="api_command", required=True, metavar="<api-command>")
+    p = api_sub.add_parser("user", help="GET /api/oauth2/user.")
+    add_api_connection_options(p)
+    p = api_sub.add_parser("parking-lots", help="GET /api/parking-lots.")
+    add_api_connection_options(p)
+    p = api_sub.add_parser("wallet", help="GET the current account's wallet.")
+    add_api_connection_options(p)
+    p.add_argument("--user-id", help="Optional user ID override; defaults to current account.")
+    p = api_sub.add_parser(
+        "wallet-topup", help="Initiate POST /api/users/{userId}/wallet/topup."
+    )
+    add_api_connection_options(p)
+    p.add_argument("--user-id", help="Optional user ID override; defaults to current account.")
+    p.add_argument("--amount", required=True, type=float, help="Positive top-up amount.")
+    p.add_argument("--execute", action="store_true", help="Send the write request (default: preview).")
+    p = api_sub.add_parser("request", help="Call any documented endpoint.")
+    add_api_connection_options(p)
+    p.add_argument("path", help="API path, for example /api/bookings/my-bookings.")
+    p.add_argument("--method", default="GET", choices=("GET", "POST", "PUT", "PATCH", "DELETE"))
+    body = p.add_mutually_exclusive_group()
+    body.add_argument("--data", help="JSON request body.")
+    body.add_argument("--data-file", type=Path, help="Read JSON request body from a file.")
+    p.add_argument("--query", action="append", default=[], metavar="KEY=VALUE")
+    p.add_argument("--header", action="append", default=[], metavar="KEY=VALUE")
+    p.add_argument("--anonymous", action="store_true", help="Do not attach authentication.")
+
+    scheduler = sub.add_parser("scheduler", help="Build and control the on-device booking scheduler.")
+    scheduler_sub = scheduler.add_subparsers(
+        dest="scheduler_command", required=True, metavar="<scheduler-command>"
+    )
+    p = scheduler_sub.add_parser("build", help="Build the Android helper APK.")
+    p.add_argument("--android-sdk")
+    p.add_argument("--build-tools-version", default="35.0.0")
+    p = scheduler_sub.add_parser("install", help="Install or update the built helper APK.")
+    p.add_argument("--apk", type=Path, default=Path("android-helper/build/gridee-scheduler-debug.apk"))
+    scheduler_sub.add_parser("enable", help="Open Android accessibility settings.")
+    p = scheduler_sub.add_parser("schedule", help="Configure a one-shot on-device UI booking.")
+    p.add_argument("--at", type=parse_datetime, required=True, help="Local ISO date/time to launch automation.")
+    p.add_argument("--venue", default="Tech Park Avenue")
+    p.add_argument("--start", default="08:00")
+    p.add_argument("--end", default="17:00")
+    p.add_argument("--date", help="Booking date passed to the helper (YYYY-MM-DD).")
+    p.add_argument("--venue-threshold", type=float, default=0.35)
+    p.add_argument("--execute", action="store_true", help="Allow final booking confirmation.")
+    scheduler_sub.add_parser("status", help="Read the helper's current schedule/status.")
+    scheduler_sub.add_parser("cancel", help="Cancel the pending on-device schedule.")
 
     sub.add_parser("inspect", help="Interactive UI inspector.")
     return parser
@@ -615,6 +730,13 @@ def main() -> int:
     if args.command == "devices":
         return list_devices(args.adb, args.json)
 
+    if args.command in {"auth", "api"}:
+        try:
+            return run_auth(args) if args.command == "auth" else run_api(args)
+        except (ApiError, OSError) as exc:
+            print(f"[!] {exc}", file=sys.stderr)
+            return 1
+
     cfg = Config(
         device=args.device,
         package=args.package,
@@ -637,6 +759,9 @@ def main() -> int:
             }
             print(json.dumps(data, indent=2))
             return 0
+
+        if args.command == "scheduler" and args.scheduler_command == "build":
+            return run_scheduler(app, args)
 
         app.verify_device()
 
@@ -725,6 +850,12 @@ def main() -> int:
 
         if args.command == "reward":
             return run_reward(app, args)
+
+        if args.command == "booking":
+            return run_booking(app, args)
+
+        if args.command == "scheduler":
+            return run_scheduler(app, args)
 
         if args.command == "inspect":
             return inspect(app)
