@@ -1,0 +1,4517 @@
+{
+  "apk": "C:\\Users\\yashasvi\\Downloads\\gridee_cli\\analysis\\gridee-1.73-base.apk",
+  "applicationId": "com.gridee.parking",
+  "versionName": "1.73",
+  "versionCode": 74,
+  "endpointCount": 54,
+  "declarationCount": 60,
+  "endpoints": [
+    {
+      "method": "PUT",
+      "route": "/api/admin/bookings/{userId}/{bookingId}",
+      "functions": [
+        "updateBookingStatus"
+      ],
+      "query": [],
+      "hasBody": true,
+      "requestTypes": [
+        "Map"
+      ],
+      "responseTypes": [
+        "Booking"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.Booking"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        {
+          "<key>": "<value>"
+        }
+      ],
+      "responsePatterns": [
+        {
+          "actualCheckInTime": "<ISO-8601 datetime>",
+          "actualCheckOutTime": "<ISO-8601 datetime>",
+          "amount": "<number>",
+          "archivedAt": "<ISO-8601 datetime>",
+          "autoCompleted": "<boolean>",
+          "balanceSettled": "<boolean>",
+          "bookingType": "<string>",
+          "cancelledAt": "<ISO-8601 datetime>",
+          "checkInOperatorId": "<string>",
+          "checkInTime": "<ISO-8601 datetime>",
+          "checkOutOperatorId": "<string>",
+          "checkOutTime": "<ISO-8601 datetime>",
+          "createdAt": "<ISO-8601 datetime>",
+          "endingReminderSent": "<boolean>",
+          "endingReminderSentAt": "<ISO-8601 datetime>",
+          "id": "<string>",
+          "locationId": "<string>",
+          "locationName": "<string>",
+          "lotId": "<string>",
+          "lotName": "<string>",
+          "organizationId": "<string>",
+          "organizationName": "<string>",
+          "organizationType": "<string>",
+          "paymentModel": "<string>",
+          "qrCode": "<string>",
+          "qrCodeScanned": "<boolean>",
+          "spotId": "<string>",
+          "status": "<string>",
+          "updatedAt": "<ISO-8601 datetime>",
+          "userId": "<string>",
+          "vehicleNumber": "<string>"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/auth/firebase/exchange",
+      "functions": [
+        "exchangeFirebaseToken"
+      ],
+      "query": [],
+      "hasBody": true,
+      "requestTypes": [
+        "FirebaseTokenExchangeRequest"
+      ],
+      "responseTypes": [
+        "AuthResponse"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.FirebaseTokenExchangeRequest",
+        "com.gridee.parking.data.model.AuthResponse"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        {
+          "idToken": "<string>"
+        }
+      ],
+      "responsePatterns": [
+        {
+          "isNewUser": "<boolean>",
+          "message": "<string>",
+          "mfaEnabled": "<boolean>",
+          "mfaRequired": "<boolean>",
+          "profileComplete": "<boolean>",
+          "requiresProfileCompletion": "<boolean>",
+          "token": "<string>",
+          "tokenType": "<string>",
+          "user": {
+            "active": "<boolean>",
+            "createdAt": "<string>",
+            "email": "<string>",
+            "firstUser": "<boolean>",
+            "id": "<string>",
+            "name": "<string>",
+            "parkingLotId": "<string>",
+            "parkingLotName": "<string>",
+            "phone": "<string>",
+            "role": "<string>",
+            "updatedAt": "<string>",
+            "vehicleNumbers": [
+              "<string>"
+            ],
+            "walletCoins": "<integer>"
+          }
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/auth/google",
+      "functions": [
+        "googleSignIn"
+      ],
+      "query": [],
+      "hasBody": true,
+      "requestTypes": [
+        "Map"
+      ],
+      "responseTypes": [
+        "AuthResponse"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.AuthResponse"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        {
+          "<key>": "<value>"
+        }
+      ],
+      "responsePatterns": [
+        {
+          "isNewUser": "<boolean>",
+          "message": "<string>",
+          "mfaEnabled": "<boolean>",
+          "mfaRequired": "<boolean>",
+          "profileComplete": "<boolean>",
+          "requiresProfileCompletion": "<boolean>",
+          "token": "<string>",
+          "tokenType": "<string>",
+          "user": {
+            "active": "<boolean>",
+            "createdAt": "<string>",
+            "email": "<string>",
+            "firstUser": "<boolean>",
+            "id": "<string>",
+            "name": "<string>",
+            "parkingLotId": "<string>",
+            "parkingLotName": "<string>",
+            "phone": "<string>",
+            "role": "<string>",
+            "updatedAt": "<string>",
+            "vehicleNumbers": [
+              "<string>"
+            ],
+            "walletCoins": "<integer>"
+          }
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/auth/login",
+      "functions": [
+        "authLogin"
+      ],
+      "query": [],
+      "hasBody": true,
+      "requestTypes": [
+        "AuthRequest"
+      ],
+      "responseTypes": [
+        "AuthResponse"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.AuthRequest",
+        "com.gridee.parking.data.model.AuthResponse"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        {
+          "email": "<string>",
+          "password": "<string>"
+        }
+      ],
+      "responsePatterns": [
+        {
+          "isNewUser": "<boolean>",
+          "message": "<string>",
+          "mfaEnabled": "<boolean>",
+          "mfaRequired": "<boolean>",
+          "profileComplete": "<boolean>",
+          "requiresProfileCompletion": "<boolean>",
+          "token": "<string>",
+          "tokenType": "<string>",
+          "user": {
+            "active": "<boolean>",
+            "createdAt": "<string>",
+            "email": "<string>",
+            "firstUser": "<boolean>",
+            "id": "<string>",
+            "name": "<string>",
+            "parkingLotId": "<string>",
+            "parkingLotName": "<string>",
+            "phone": "<string>",
+            "role": "<string>",
+            "updatedAt": "<string>",
+            "vehicleNumbers": [
+              "<string>"
+            ],
+            "walletCoins": "<integer>"
+          }
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/auth/register",
+      "functions": [
+        "registerUser"
+      ],
+      "query": [],
+      "hasBody": true,
+      "requestTypes": [
+        "UserRegistration"
+      ],
+      "responseTypes": [
+        "AuthResponse"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.UserRegistration",
+        "com.gridee.parking.data.model.AuthResponse"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        {
+          "email": "<string>",
+          "name": "<string>",
+          "parkingLotName": "<string>",
+          "password": "<string>",
+          "phone": "<string>",
+          "vehicleNumbers": [
+            "<string>"
+          ]
+        }
+      ],
+      "responsePatterns": [
+        {
+          "isNewUser": "<boolean>",
+          "message": "<string>",
+          "mfaEnabled": "<boolean>",
+          "mfaRequired": "<boolean>",
+          "profileComplete": "<boolean>",
+          "requiresProfileCompletion": "<boolean>",
+          "token": "<string>",
+          "tokenType": "<string>",
+          "user": {
+            "active": "<boolean>",
+            "createdAt": "<string>",
+            "email": "<string>",
+            "firstUser": "<boolean>",
+            "id": "<string>",
+            "name": "<string>",
+            "parkingLotId": "<string>",
+            "parkingLotName": "<string>",
+            "phone": "<string>",
+            "role": "<string>",
+            "updatedAt": "<string>",
+            "vehicleNumbers": [
+              "<string>"
+            ],
+            "walletCoins": "<integer>"
+          }
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/bookings/{userId}/all",
+      "functions": [
+        "getUserBookings"
+      ],
+      "query": [],
+      "hasBody": false,
+      "requestTypes": [
+        "none"
+      ],
+      "responseTypes": [
+        "JsonElement"
+      ],
+      "models": [],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        null
+      ],
+      "responsePatterns": [
+        "<dynamic JSON>"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/bookings/{userId}/all/history",
+      "functions": [
+        "getUserBookingHistory"
+      ],
+      "query": [],
+      "hasBody": false,
+      "requestTypes": [
+        "none"
+      ],
+      "responseTypes": [
+        "JsonElement"
+      ],
+      "models": [],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        null
+      ],
+      "responsePatterns": [
+        "<dynamic JSON>"
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/bookings/{userId}/checkin/{bookingId}",
+      "functions": [
+        "checkInBooking"
+      ],
+      "query": [],
+      "hasBody": true,
+      "requestTypes": [
+        "CheckInRequest"
+      ],
+      "responseTypes": [
+        "Booking"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.CheckInRequest",
+        "com.gridee.parking.data.model.Booking"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        {
+          "mode": {},
+          "parkingLotId": "<string>",
+          "parkingSpotId": "<string>",
+          "pin": "<string>",
+          "qrCode": "<string>",
+          "vehicleNumber": "<string>"
+        }
+      ],
+      "responsePatterns": [
+        {
+          "actualCheckInTime": "<ISO-8601 datetime>",
+          "actualCheckOutTime": "<ISO-8601 datetime>",
+          "amount": "<number>",
+          "archivedAt": "<ISO-8601 datetime>",
+          "autoCompleted": "<boolean>",
+          "balanceSettled": "<boolean>",
+          "bookingType": "<string>",
+          "cancelledAt": "<ISO-8601 datetime>",
+          "checkInOperatorId": "<string>",
+          "checkInTime": "<ISO-8601 datetime>",
+          "checkOutOperatorId": "<string>",
+          "checkOutTime": "<ISO-8601 datetime>",
+          "createdAt": "<ISO-8601 datetime>",
+          "endingReminderSent": "<boolean>",
+          "endingReminderSentAt": "<ISO-8601 datetime>",
+          "id": "<string>",
+          "locationId": "<string>",
+          "locationName": "<string>",
+          "lotId": "<string>",
+          "lotName": "<string>",
+          "organizationId": "<string>",
+          "organizationName": "<string>",
+          "organizationType": "<string>",
+          "paymentModel": "<string>",
+          "qrCode": "<string>",
+          "qrCodeScanned": "<boolean>",
+          "spotId": "<string>",
+          "status": "<string>",
+          "updatedAt": "<ISO-8601 datetime>",
+          "userId": "<string>",
+          "vehicleNumber": "<string>"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/bookings/{userId}/checkout/{bookingId}",
+      "functions": [
+        "checkOutBooking"
+      ],
+      "query": [],
+      "hasBody": true,
+      "requestTypes": [
+        "CheckInRequest"
+      ],
+      "responseTypes": [
+        "Booking"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.CheckInRequest",
+        "com.gridee.parking.data.model.Booking"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        {
+          "mode": {},
+          "parkingLotId": "<string>",
+          "parkingSpotId": "<string>",
+          "pin": "<string>",
+          "qrCode": "<string>",
+          "vehicleNumber": "<string>"
+        }
+      ],
+      "responsePatterns": [
+        {
+          "actualCheckInTime": "<ISO-8601 datetime>",
+          "actualCheckOutTime": "<ISO-8601 datetime>",
+          "amount": "<number>",
+          "archivedAt": "<ISO-8601 datetime>",
+          "autoCompleted": "<boolean>",
+          "balanceSettled": "<boolean>",
+          "bookingType": "<string>",
+          "cancelledAt": "<ISO-8601 datetime>",
+          "checkInOperatorId": "<string>",
+          "checkInTime": "<ISO-8601 datetime>",
+          "checkOutOperatorId": "<string>",
+          "checkOutTime": "<ISO-8601 datetime>",
+          "createdAt": "<ISO-8601 datetime>",
+          "endingReminderSent": "<boolean>",
+          "endingReminderSentAt": "<ISO-8601 datetime>",
+          "id": "<string>",
+          "locationId": "<string>",
+          "locationName": "<string>",
+          "lotId": "<string>",
+          "lotName": "<string>",
+          "organizationId": "<string>",
+          "organizationName": "<string>",
+          "organizationType": "<string>",
+          "paymentModel": "<string>",
+          "qrCode": "<string>",
+          "qrCodeScanned": "<boolean>",
+          "spotId": "<string>",
+          "status": "<string>",
+          "updatedAt": "<ISO-8601 datetime>",
+          "userId": "<string>",
+          "vehicleNumber": "<string>"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/bookings/{userId}/create",
+      "functions": [
+        "createBooking"
+      ],
+      "query": [],
+      "hasBody": true,
+      "requestTypes": [
+        "CreateBookingRequest"
+      ],
+      "responseTypes": [
+        "Booking"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.CreateBookingRequest",
+        "com.gridee.parking.data.model.Booking"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        {
+          "checkInTime": "<yyyy-MM-ddTHH:mm:ss+05:30>",
+          "checkOutTime": "<yyyy-MM-ddTHH:mm:ss+05:30>",
+          "lotId": "<string>",
+          "spotId": "<string>",
+          "vehicleNumber": "<string>"
+        }
+      ],
+      "responsePatterns": [
+        {
+          "actualCheckInTime": "<ISO-8601 datetime>",
+          "actualCheckOutTime": "<ISO-8601 datetime>",
+          "amount": "<number>",
+          "archivedAt": "<ISO-8601 datetime>",
+          "autoCompleted": "<boolean>",
+          "balanceSettled": "<boolean>",
+          "bookingType": "<string>",
+          "cancelledAt": "<ISO-8601 datetime>",
+          "checkInOperatorId": "<string>",
+          "checkInTime": "<ISO-8601 datetime>",
+          "checkOutOperatorId": "<string>",
+          "checkOutTime": "<ISO-8601 datetime>",
+          "createdAt": "<ISO-8601 datetime>",
+          "endingReminderSent": "<boolean>",
+          "endingReminderSentAt": "<ISO-8601 datetime>",
+          "id": "<string>",
+          "locationId": "<string>",
+          "locationName": "<string>",
+          "lotId": "<string>",
+          "lotName": "<string>",
+          "organizationId": "<string>",
+          "organizationName": "<string>",
+          "organizationType": "<string>",
+          "paymentModel": "<string>",
+          "qrCode": "<string>",
+          "qrCodeScanned": "<boolean>",
+          "spotId": "<string>",
+          "status": "<string>",
+          "updatedAt": "<ISO-8601 datetime>",
+          "userId": "<string>",
+          "vehicleNumber": "<string>"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/bookings/{userId}/{bookingId}",
+      "functions": [
+        "getBookingById"
+      ],
+      "query": [],
+      "hasBody": false,
+      "requestTypes": [
+        "none"
+      ],
+      "responseTypes": [
+        "Booking"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.Booking"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        null
+      ],
+      "responsePatterns": [
+        {
+          "actualCheckInTime": "<ISO-8601 datetime>",
+          "actualCheckOutTime": "<ISO-8601 datetime>",
+          "amount": "<number>",
+          "archivedAt": "<ISO-8601 datetime>",
+          "autoCompleted": "<boolean>",
+          "balanceSettled": "<boolean>",
+          "bookingType": "<string>",
+          "cancelledAt": "<ISO-8601 datetime>",
+          "checkInOperatorId": "<string>",
+          "checkInTime": "<ISO-8601 datetime>",
+          "checkOutOperatorId": "<string>",
+          "checkOutTime": "<ISO-8601 datetime>",
+          "createdAt": "<ISO-8601 datetime>",
+          "endingReminderSent": "<boolean>",
+          "endingReminderSentAt": "<ISO-8601 datetime>",
+          "id": "<string>",
+          "locationId": "<string>",
+          "locationName": "<string>",
+          "lotId": "<string>",
+          "lotName": "<string>",
+          "organizationId": "<string>",
+          "organizationName": "<string>",
+          "organizationType": "<string>",
+          "paymentModel": "<string>",
+          "qrCode": "<string>",
+          "qrCodeScanned": "<boolean>",
+          "spotId": "<string>",
+          "status": "<string>",
+          "updatedAt": "<ISO-8601 datetime>",
+          "userId": "<string>",
+          "vehicleNumber": "<string>"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/bookings/{userId}/{bookingId}/cancel",
+      "functions": [
+        "cancelBooking"
+      ],
+      "query": [],
+      "hasBody": false,
+      "requestTypes": [
+        "none"
+      ],
+      "responseTypes": [
+        "null"
+      ],
+      "models": [],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        null
+      ],
+      "responsePatterns": [
+        null
+      ]
+    },
+    {
+      "method": "PUT",
+      "route": "/api/bookings/{userId}/{bookingId}/extend",
+      "functions": [
+        "extendBooking"
+      ],
+      "query": [],
+      "hasBody": true,
+      "requestTypes": [
+        "Map"
+      ],
+      "responseTypes": [
+        "Booking"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.Booking"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        {
+          "<key>": "<value>"
+        }
+      ],
+      "responsePatterns": [
+        {
+          "actualCheckInTime": "<ISO-8601 datetime>",
+          "actualCheckOutTime": "<ISO-8601 datetime>",
+          "amount": "<number>",
+          "archivedAt": "<ISO-8601 datetime>",
+          "autoCompleted": "<boolean>",
+          "balanceSettled": "<boolean>",
+          "bookingType": "<string>",
+          "cancelledAt": "<ISO-8601 datetime>",
+          "checkInOperatorId": "<string>",
+          "checkInTime": "<ISO-8601 datetime>",
+          "checkOutOperatorId": "<string>",
+          "checkOutTime": "<ISO-8601 datetime>",
+          "createdAt": "<ISO-8601 datetime>",
+          "endingReminderSent": "<boolean>",
+          "endingReminderSentAt": "<ISO-8601 datetime>",
+          "id": "<string>",
+          "locationId": "<string>",
+          "locationName": "<string>",
+          "lotId": "<string>",
+          "lotName": "<string>",
+          "organizationId": "<string>",
+          "organizationName": "<string>",
+          "organizationType": "<string>",
+          "paymentModel": "<string>",
+          "qrCode": "<string>",
+          "qrCodeScanned": "<boolean>",
+          "spotId": "<string>",
+          "status": "<string>",
+          "updatedAt": "<ISO-8601 datetime>",
+          "userId": "<string>",
+          "vehicleNumber": "<string>"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/bookings/{userId}/{bookingId}/penalty",
+      "functions": [
+        "getPenaltyInfo"
+      ],
+      "query": [],
+      "hasBody": false,
+      "requestTypes": [
+        "none"
+      ],
+      "responseTypes": [
+        "number"
+      ],
+      "models": [],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        null
+      ],
+      "responsePatterns": [
+        "<number>"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/bookings/{userId}/{bookingId}/priceBreakup",
+      "functions": [
+        "getBookingPriceBreakup"
+      ],
+      "query": [],
+      "hasBody": false,
+      "requestTypes": [
+        "none"
+      ],
+      "responseTypes": [
+        "Map<string, object>"
+      ],
+      "models": [],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        null
+      ],
+      "responsePatterns": [
+        {
+          "<key>": "<value>"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/config/all",
+      "functions": [
+        "getAppConfig"
+      ],
+      "query": [],
+      "hasBody": false,
+      "requestTypes": [
+        "none"
+      ],
+      "responseTypes": [
+        "AppConfigResponse"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.AppConfigResponse"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        null
+      ],
+      "responsePatterns": [
+        {
+          "data": {
+            "booking": {
+              "allowSequentialBookings": "<boolean>",
+              "autoActivateNextBooking": "<boolean>",
+              "autoFinalizeOverdueCheckoutMinutes": "<integer>",
+              "autoFinalizeOverdueCheckouts": "<boolean>",
+              "bookingValidationRules": {
+                "<key>": "<value>"
+              },
+              "maxBookingDurationHours": "<integer>",
+              "maxConcurrentBookingsPerUser": "<integer>",
+              "maxPricingPerHour": "<number>",
+              "maxSequentialBookings": "<integer>",
+              "minBookingDurationMinutes": "<integer>",
+              "noShowGraceMinutes": "<integer>"
+            },
+            "cacheTtlSeconds": "<integer>",
+            "createdAt": "<integer>",
+            "customSettings": {
+              "<key>": "<value>"
+            },
+            "description": "<string>",
+            "features": {
+              "adMobEnabled": "<boolean>",
+              "bookingFeatureEnabled": "<boolean>",
+              "bookingTransitionInterstitialEnabled": "<boolean>",
+              "bookingTransitionPreloadBufferEnabled": "<boolean>",
+              "emailNotificationsEnabled": "<boolean>",
+              "emailSignInEnabled": "<boolean>",
+              "featureToggleMap": {
+                "<key>": "<value>"
+              },
+              "googleSignInEnabled": "<boolean>",
+              "locationTrackingEnabled": "<boolean>",
+              "maintenanceMessage": "<string>",
+              "maintenanceMode": "<boolean>",
+              "maintenanceTitle": "<string>",
+              "multipleBookingsAllowed": "<boolean>",
+              "notificationsEnabled": "<boolean>",
+              "pushNotificationsEnabled": "<boolean>",
+              "rateLimitingEnabled": "<boolean>",
+              "rewardedDailyCapEnabled": "<boolean>",
+              "rewardsEnabled": "<boolean>",
+              "sequentialBookingEnabled": "<boolean>",
+              "walletFeatureEnabled": "<boolean>"
+            },
+            "financial": {
+              "cancellationRefundFullRefundHours": "<number>",
+              "cancellationRefundPartialPercentage": "<number>",
+              "cancellationRefundPartialRefundHours": "<number>",
+              "customCharges": {
+                "<key>": "<value>"
+              },
+              "lateCheckoutGracePeriodMinutes": "<number>",
+              "lateCheckoutPenaltyPerMin": "<number>",
+              "maxLateCheckoutPenaltyPerMin": "<number>",
+              "maxWalletTopUpAmount": "<number>",
+              "minWalletTopUpAmount": "<number>",
+              "noShowDeduction": "<number>",
+              "overdueCheckoutPenaltyPercentage": "<number>",
+              "paymentGatewayTaxPercentage": "<number>",
+              "penaltyEscalationIntervalMins": "<integer>",
+              "welcomeBonusAmount": "<number>"
+            },
+            "home": {
+              "showSlotFilters": "<boolean>"
+            },
+            "id": "<string>",
+            "lastUpdatedAt": "<integer>",
+            "notification": {
+              "checkInReminderMinutesBefore": "<integer>",
+              "checkOutReminderMinutesAfter": "<integer>",
+              "maxNotificationsPerUser": "<integer>",
+              "notificationProvider": "<string>",
+              "sendBookingConfirmation": "<boolean>",
+              "sendCancellationNotification": "<boolean>",
+              "sendCheckInReminders": "<boolean>",
+              "sendCheckOutReminders": "<boolean>",
+              "sendPenaltyNotifications": "<boolean>"
+            },
+            "platform": {
+              "apiVersion": "<string>",
+              "currency": "<string>",
+              "currencySymbol": "<string>",
+              "debugMode": "<boolean>",
+              "enableCors": "<boolean>",
+              "enableSwagger": "<boolean>",
+              "environment": "<string>",
+              "externalServiceUrls": {
+                "<key>": "<value>"
+              },
+              "rateLimitPerHour": "<integer>",
+              "rateLimitPerMinute": "<integer>",
+              "requestTimeoutSeconds": "<integer>",
+              "timezone": "<string>"
+            },
+            "schemaVersion": "<integer>",
+            "updatedBy": "<string>",
+            "versions": {
+              "androidPlayStoreUrl": "<string>",
+              "androidUpdateMessage": "<string>",
+              "forceAndroidUpdate": "<boolean>",
+              "forceIOSUpdate": "<boolean>",
+              "iosAppStoreUrl": "<string>",
+              "iosUpdateMessage": "<string>",
+              "latestAndroidVersion": "<string>",
+              "latestAndroidVersionCode": "<integer>",
+              "latestIOSVersion": "<string>",
+              "minAndroidVersion": "<string>",
+              "minAndroidVersionCode": "<integer>",
+              "minIOSVersion": "<string>",
+              "recommendedAndroidUpdate": "<boolean>",
+              "recommendedIOSUpdate": "<boolean>",
+              "webVersion": "<string>"
+            }
+          },
+          "error": "<string>",
+          "message": "<string>",
+          "status": "<integer>",
+          "success": "<boolean>",
+          "timestamp": "<integer>"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/custom-ads/active",
+      "functions": [
+        "getActiveCustomAds"
+      ],
+      "query": [
+        "placement",
+        "platform",
+        "parkingLotId"
+      ],
+      "hasBody": false,
+      "requestTypes": [
+        "none"
+      ],
+      "responseTypes": [
+        "JsonElement"
+      ],
+      "models": [],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        null
+      ],
+      "responsePatterns": [
+        "<dynamic JSON>"
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/custom-ads/{adId}/click",
+      "functions": [
+        "trackCustomAdClick"
+      ],
+      "query": [],
+      "hasBody": false,
+      "requestTypes": [
+        "none"
+      ],
+      "responseTypes": [
+        "null"
+      ],
+      "models": [],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        null
+      ],
+      "responsePatterns": [
+        null
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/custom-ads/{adId}/impression",
+      "functions": [
+        "trackCustomAdImpression"
+      ],
+      "query": [],
+      "hasBody": false,
+      "requestTypes": [
+        "none"
+      ],
+      "responseTypes": [
+        "null"
+      ],
+      "models": [],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        null
+      ],
+      "responsePatterns": [
+        null
+      ]
+    },
+    {
+      "method": "DELETE",
+      "route": "/api/notifications/tokens",
+      "functions": [
+        "unregisterNotificationToken"
+      ],
+      "query": [],
+      "hasBody": true,
+      "requestTypes": [
+        "DeviceTokenUnregisterRequest"
+      ],
+      "responseTypes": [
+        "null"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.DeviceTokenUnregisterRequest"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        {
+          "token": "<string>"
+        }
+      ],
+      "responsePatterns": [
+        null
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/notifications/tokens",
+      "functions": [
+        "registerNotificationToken"
+      ],
+      "query": [],
+      "hasBody": true,
+      "requestTypes": [
+        "DeviceTokenRegisterRequest"
+      ],
+      "responseTypes": [
+        "null"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.DeviceTokenRegisterRequest"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        {
+          "appVersion": "<string>",
+          "deviceId": "<string>",
+          "platform": "<string>",
+          "token": "<string>"
+        }
+      ],
+      "responsePatterns": [
+        null
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/oauth2/user",
+      "functions": [
+        "getOAuth2User"
+      ],
+      "query": [],
+      "hasBody": false,
+      "requestTypes": [
+        "none"
+      ],
+      "responseTypes": [
+        "Map<string, object>"
+      ],
+      "models": [],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        null
+      ],
+      "responsePatterns": [
+        {
+          "<key>": "<value>"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/operator/bookings/checkin",
+      "functions": [
+        "operatorCheckIn"
+      ],
+      "query": [],
+      "hasBody": true,
+      "requestTypes": [
+        "CheckInRequest"
+      ],
+      "responseTypes": [
+        "Booking"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.CheckInRequest",
+        "com.gridee.parking.data.model.Booking"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        {
+          "mode": {},
+          "parkingLotId": "<string>",
+          "parkingSpotId": "<string>",
+          "pin": "<string>",
+          "qrCode": "<string>",
+          "vehicleNumber": "<string>"
+        }
+      ],
+      "responsePatterns": [
+        {
+          "actualCheckInTime": "<ISO-8601 datetime>",
+          "actualCheckOutTime": "<ISO-8601 datetime>",
+          "amount": "<number>",
+          "archivedAt": "<ISO-8601 datetime>",
+          "autoCompleted": "<boolean>",
+          "balanceSettled": "<boolean>",
+          "bookingType": "<string>",
+          "cancelledAt": "<ISO-8601 datetime>",
+          "checkInOperatorId": "<string>",
+          "checkInTime": "<ISO-8601 datetime>",
+          "checkOutOperatorId": "<string>",
+          "checkOutTime": "<ISO-8601 datetime>",
+          "createdAt": "<ISO-8601 datetime>",
+          "endingReminderSent": "<boolean>",
+          "endingReminderSentAt": "<ISO-8601 datetime>",
+          "id": "<string>",
+          "locationId": "<string>",
+          "locationName": "<string>",
+          "lotId": "<string>",
+          "lotName": "<string>",
+          "organizationId": "<string>",
+          "organizationName": "<string>",
+          "organizationType": "<string>",
+          "paymentModel": "<string>",
+          "qrCode": "<string>",
+          "qrCodeScanned": "<boolean>",
+          "spotId": "<string>",
+          "status": "<string>",
+          "updatedAt": "<ISO-8601 datetime>",
+          "userId": "<string>",
+          "vehicleNumber": "<string>"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/operator/bookings/checkout",
+      "functions": [
+        "operatorCheckOut"
+      ],
+      "query": [],
+      "hasBody": true,
+      "requestTypes": [
+        "CheckInRequest"
+      ],
+      "responseTypes": [
+        "Booking"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.CheckInRequest",
+        "com.gridee.parking.data.model.Booking"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        {
+          "mode": {},
+          "parkingLotId": "<string>",
+          "parkingSpotId": "<string>",
+          "pin": "<string>",
+          "qrCode": "<string>",
+          "vehicleNumber": "<string>"
+        }
+      ],
+      "responsePatterns": [
+        {
+          "actualCheckInTime": "<ISO-8601 datetime>",
+          "actualCheckOutTime": "<ISO-8601 datetime>",
+          "amount": "<number>",
+          "archivedAt": "<ISO-8601 datetime>",
+          "autoCompleted": "<boolean>",
+          "balanceSettled": "<boolean>",
+          "bookingType": "<string>",
+          "cancelledAt": "<ISO-8601 datetime>",
+          "checkInOperatorId": "<string>",
+          "checkInTime": "<ISO-8601 datetime>",
+          "checkOutOperatorId": "<string>",
+          "checkOutTime": "<ISO-8601 datetime>",
+          "createdAt": "<ISO-8601 datetime>",
+          "endingReminderSent": "<boolean>",
+          "endingReminderSentAt": "<ISO-8601 datetime>",
+          "id": "<string>",
+          "locationId": "<string>",
+          "locationName": "<string>",
+          "lotId": "<string>",
+          "lotName": "<string>",
+          "organizationId": "<string>",
+          "organizationName": "<string>",
+          "organizationType": "<string>",
+          "paymentModel": "<string>",
+          "qrCode": "<string>",
+          "qrCodeScanned": "<boolean>",
+          "spotId": "<string>",
+          "status": "<string>",
+          "updatedAt": "<ISO-8601 datetime>",
+          "userId": "<string>",
+          "vehicleNumber": "<string>"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/operator/parking-lots/{lotId}/spots",
+      "functions": [
+        "getOperatorParkingSpotsForLotPayload"
+      ],
+      "query": [],
+      "hasBody": false,
+      "requestTypes": [
+        "none"
+      ],
+      "responseTypes": [
+        "JsonElement"
+      ],
+      "models": [],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        null
+      ],
+      "responsePatterns": [
+        "<dynamic JSON>"
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/operator/parking-lots/{parkingLotId}/bookings/checkin",
+      "functions": [
+        "operatorCheckInForLot"
+      ],
+      "query": [],
+      "hasBody": true,
+      "requestTypes": [
+        "CheckInRequest"
+      ],
+      "responseTypes": [
+        "Booking"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.CheckInRequest",
+        "com.gridee.parking.data.model.Booking"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        {
+          "mode": {},
+          "parkingLotId": "<string>",
+          "parkingSpotId": "<string>",
+          "pin": "<string>",
+          "qrCode": "<string>",
+          "vehicleNumber": "<string>"
+        }
+      ],
+      "responsePatterns": [
+        {
+          "actualCheckInTime": "<ISO-8601 datetime>",
+          "actualCheckOutTime": "<ISO-8601 datetime>",
+          "amount": "<number>",
+          "archivedAt": "<ISO-8601 datetime>",
+          "autoCompleted": "<boolean>",
+          "balanceSettled": "<boolean>",
+          "bookingType": "<string>",
+          "cancelledAt": "<ISO-8601 datetime>",
+          "checkInOperatorId": "<string>",
+          "checkInTime": "<ISO-8601 datetime>",
+          "checkOutOperatorId": "<string>",
+          "checkOutTime": "<ISO-8601 datetime>",
+          "createdAt": "<ISO-8601 datetime>",
+          "endingReminderSent": "<boolean>",
+          "endingReminderSentAt": "<ISO-8601 datetime>",
+          "id": "<string>",
+          "locationId": "<string>",
+          "locationName": "<string>",
+          "lotId": "<string>",
+          "lotName": "<string>",
+          "organizationId": "<string>",
+          "organizationName": "<string>",
+          "organizationType": "<string>",
+          "paymentModel": "<string>",
+          "qrCode": "<string>",
+          "qrCodeScanned": "<boolean>",
+          "spotId": "<string>",
+          "status": "<string>",
+          "updatedAt": "<ISO-8601 datetime>",
+          "userId": "<string>",
+          "vehicleNumber": "<string>"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/operator/parking-lots/{parkingLotId}/bookings/checkout",
+      "functions": [
+        "operatorCheckOutForLot"
+      ],
+      "query": [],
+      "hasBody": true,
+      "requestTypes": [
+        "CheckInRequest"
+      ],
+      "responseTypes": [
+        "Booking"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.CheckInRequest",
+        "com.gridee.parking.data.model.Booking"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        {
+          "mode": {},
+          "parkingLotId": "<string>",
+          "parkingSpotId": "<string>",
+          "pin": "<string>",
+          "qrCode": "<string>",
+          "vehicleNumber": "<string>"
+        }
+      ],
+      "responsePatterns": [
+        {
+          "actualCheckInTime": "<ISO-8601 datetime>",
+          "actualCheckOutTime": "<ISO-8601 datetime>",
+          "amount": "<number>",
+          "archivedAt": "<ISO-8601 datetime>",
+          "autoCompleted": "<boolean>",
+          "balanceSettled": "<boolean>",
+          "bookingType": "<string>",
+          "cancelledAt": "<ISO-8601 datetime>",
+          "checkInOperatorId": "<string>",
+          "checkInTime": "<ISO-8601 datetime>",
+          "checkOutOperatorId": "<string>",
+          "checkOutTime": "<ISO-8601 datetime>",
+          "createdAt": "<ISO-8601 datetime>",
+          "endingReminderSent": "<boolean>",
+          "endingReminderSentAt": "<ISO-8601 datetime>",
+          "id": "<string>",
+          "locationId": "<string>",
+          "locationName": "<string>",
+          "lotId": "<string>",
+          "lotName": "<string>",
+          "organizationId": "<string>",
+          "organizationName": "<string>",
+          "organizationType": "<string>",
+          "paymentModel": "<string>",
+          "qrCode": "<string>",
+          "qrCodeScanned": "<boolean>",
+          "spotId": "<string>",
+          "status": "<string>",
+          "updatedAt": "<ISO-8601 datetime>",
+          "userId": "<string>",
+          "vehicleNumber": "<string>"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/operator/parking-spots",
+      "functions": [
+        "getOperatorParkingSpots",
+        "getOperatorParkingSpotsPayload"
+      ],
+      "query": [],
+      "hasBody": false,
+      "requestTypes": [
+        "none"
+      ],
+      "responseTypes": [
+        "List<ParkingSpot>",
+        "JsonElement"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.ParkingSpot"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        null
+      ],
+      "responsePatterns": [
+        [
+          {
+            "available": "<integer>",
+            "bookingRate": "<number>",
+            "capacity": "<integer>",
+            "id": "<string>",
+            "lotId": "<string>",
+            "lotName": "<string>",
+            "name": "<string>",
+            "slotId": "<integer>",
+            "slotName": "<string>",
+            "spotCode": "<string>",
+            "status": "<string>",
+            "zoneName": "<string>"
+          }
+        ],
+        "<dynamic JSON>"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/parking-lots",
+      "functions": [
+        "getParkingLots",
+        "getParkingLotsByType",
+        "getParkingLotsPayload"
+      ],
+      "query": [
+        "organizationType"
+      ],
+      "hasBody": false,
+      "requestTypes": [
+        "none"
+      ],
+      "responseTypes": [
+        "List<ParkingLot>",
+        "JsonElement"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.ParkingLot"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        null
+      ],
+      "responsePatterns": [
+        [
+          {
+            "active": "<boolean>",
+            "address": "<string>",
+            "availableSpots": "<integer>",
+            "bookingPolicy": {
+              "accessTypes": [
+                "<string>"
+              ],
+              "advanceBookingDays": "<integer>",
+              "allowAdvanceBooking": "<boolean>",
+              "allowOvernightBookings": "<boolean>",
+              "allowWalkIn": "<boolean>",
+              "bookingMode": "<string>",
+              "bookingRequired": "<boolean>",
+              "dailyBookingEndTime": "<string>",
+              "fixedTimeSlotsEnabled": "<boolean>",
+              "nextDayBookingOpenTime": "<string>",
+              "paymentModel": "<string>",
+              "paymentRequired": "<boolean>",
+              "penaltyEnabled": "<boolean>",
+              "pricingType": "<string>",
+              "refundPolicy": "<string>",
+              "requiresResidentApproval": "<boolean>",
+              "requiresUserVerification": "<boolean>",
+              "requiresVehicleRegistration": "<boolean>",
+              "supportsANPR": "<boolean>",
+              "supportsOperatorValidation": "<boolean>",
+              "supportsQRCode": "<boolean>",
+              "validationMode": "<string>",
+              "welcomeBonusAmount": "<number>"
+            },
+            "id": "<string>",
+            "latitude": "<number>",
+            "location": "<string>",
+            "locationId": "<string>",
+            "locationName": "<string>",
+            "longitude": "<number>",
+            "lotType": "<string>",
+            "name": "<string>",
+            "organizationId": "<string>",
+            "organizationName": "<string>",
+            "organizationType": "<string>",
+            "paymentModel": "<string>",
+            "totalSpots": "<integer>"
+          }
+        ],
+        "<dynamic JSON>"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/parking-lots/list/by-names",
+      "functions": [
+        "getParkingLotNames"
+      ],
+      "query": [],
+      "hasBody": false,
+      "requestTypes": [
+        "none"
+      ],
+      "responseTypes": [
+        "List<string>"
+      ],
+      "models": [],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        null
+      ],
+      "responsePatterns": [
+        [
+          "<string>"
+        ]
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/parking-lots/search/by-name",
+      "functions": [
+        "getParkingLotByName"
+      ],
+      "query": [
+        "name"
+      ],
+      "hasBody": false,
+      "requestTypes": [
+        "none"
+      ],
+      "responseTypes": [
+        "ParkingLot"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.ParkingLot"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        null
+      ],
+      "responsePatterns": [
+        {
+          "active": "<boolean>",
+          "address": "<string>",
+          "availableSpots": "<integer>",
+          "bookingPolicy": {
+            "accessTypes": [
+              "<string>"
+            ],
+            "advanceBookingDays": "<integer>",
+            "allowAdvanceBooking": "<boolean>",
+            "allowOvernightBookings": "<boolean>",
+            "allowWalkIn": "<boolean>",
+            "bookingMode": "<string>",
+            "bookingRequired": "<boolean>",
+            "dailyBookingEndTime": "<string>",
+            "fixedTimeSlotsEnabled": "<boolean>",
+            "nextDayBookingOpenTime": "<string>",
+            "paymentModel": "<string>",
+            "paymentRequired": "<boolean>",
+            "penaltyEnabled": "<boolean>",
+            "pricingType": "<string>",
+            "refundPolicy": "<string>",
+            "requiresResidentApproval": "<boolean>",
+            "requiresUserVerification": "<boolean>",
+            "requiresVehicleRegistration": "<boolean>",
+            "supportsANPR": "<boolean>",
+            "supportsOperatorValidation": "<boolean>",
+            "supportsQRCode": "<boolean>",
+            "validationMode": "<string>",
+            "welcomeBonusAmount": "<number>"
+          },
+          "id": "<string>",
+          "latitude": "<number>",
+          "location": "<string>",
+          "locationId": "<string>",
+          "locationName": "<string>",
+          "longitude": "<number>",
+          "lotType": "<string>",
+          "name": "<string>",
+          "organizationId": "<string>",
+          "organizationName": "<string>",
+          "organizationType": "<string>",
+          "paymentModel": "<string>",
+          "totalSpots": "<integer>"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/parking-lots/{lotId}/booking-policy",
+      "functions": [
+        "getLotBookingPolicy"
+      ],
+      "query": [],
+      "hasBody": false,
+      "requestTypes": [
+        "none"
+      ],
+      "responseTypes": [
+        "ParkingLotBookingPolicy"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.ParkingLotBookingPolicy"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        null
+      ],
+      "responsePatterns": [
+        {
+          "accessTypes": [
+            "<string>"
+          ],
+          "advanceBookingDays": "<integer>",
+          "allowAdvanceBooking": "<boolean>",
+          "allowOvernightBookings": "<boolean>",
+          "allowWalkIn": "<boolean>",
+          "bookingMode": "<string>",
+          "bookingRequired": "<boolean>",
+          "dailyBookingEndTime": "<string>",
+          "fixedTimeSlotsEnabled": "<boolean>",
+          "nextDayBookingOpenTime": "<string>",
+          "paymentModel": "<string>",
+          "paymentRequired": "<boolean>",
+          "penaltyEnabled": "<boolean>",
+          "pricingType": "<string>",
+          "refundPolicy": "<string>",
+          "requiresResidentApproval": "<boolean>",
+          "requiresUserVerification": "<boolean>",
+          "requiresVehicleRegistration": "<boolean>",
+          "supportsANPR": "<boolean>",
+          "supportsOperatorValidation": "<boolean>",
+          "supportsQRCode": "<boolean>",
+          "validationMode": "<string>",
+          "welcomeBonusAmount": "<number>"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/parking-lots/{lotId}/bookings/{userId}/all",
+      "functions": [
+        "getUserBookingsForLot"
+      ],
+      "query": [],
+      "hasBody": false,
+      "requestTypes": [
+        "none"
+      ],
+      "responseTypes": [
+        "JsonElement"
+      ],
+      "models": [],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        null
+      ],
+      "responsePatterns": [
+        "<dynamic JSON>"
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/parking-lots/{lotId}/bookings/{userId}/create",
+      "functions": [
+        "createBookingForLot"
+      ],
+      "query": [],
+      "hasBody": true,
+      "requestTypes": [
+        "CreateBookingRequest"
+      ],
+      "responseTypes": [
+        "Booking"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.CreateBookingRequest",
+        "com.gridee.parking.data.model.Booking"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        {
+          "checkInTime": "<yyyy-MM-ddTHH:mm:ss+05:30>",
+          "checkOutTime": "<yyyy-MM-ddTHH:mm:ss+05:30>",
+          "lotId": "<string>",
+          "spotId": "<string>",
+          "vehicleNumber": "<string>"
+        }
+      ],
+      "responsePatterns": [
+        {
+          "actualCheckInTime": "<ISO-8601 datetime>",
+          "actualCheckOutTime": "<ISO-8601 datetime>",
+          "amount": "<number>",
+          "archivedAt": "<ISO-8601 datetime>",
+          "autoCompleted": "<boolean>",
+          "balanceSettled": "<boolean>",
+          "bookingType": "<string>",
+          "cancelledAt": "<ISO-8601 datetime>",
+          "checkInOperatorId": "<string>",
+          "checkInTime": "<ISO-8601 datetime>",
+          "checkOutOperatorId": "<string>",
+          "checkOutTime": "<ISO-8601 datetime>",
+          "createdAt": "<ISO-8601 datetime>",
+          "endingReminderSent": "<boolean>",
+          "endingReminderSentAt": "<ISO-8601 datetime>",
+          "id": "<string>",
+          "locationId": "<string>",
+          "locationName": "<string>",
+          "lotId": "<string>",
+          "lotName": "<string>",
+          "organizationId": "<string>",
+          "organizationName": "<string>",
+          "organizationType": "<string>",
+          "paymentModel": "<string>",
+          "qrCode": "<string>",
+          "qrCodeScanned": "<boolean>",
+          "spotId": "<string>",
+          "status": "<string>",
+          "updatedAt": "<ISO-8601 datetime>",
+          "userId": "<string>",
+          "vehicleNumber": "<string>"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/parking-lots/{lotId}/bookings/{userId}/history",
+      "functions": [
+        "getUserBookingHistoryForLot"
+      ],
+      "query": [],
+      "hasBody": false,
+      "requestTypes": [
+        "none"
+      ],
+      "responseTypes": [
+        "JsonElement"
+      ],
+      "models": [],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        null
+      ],
+      "responsePatterns": [
+        "<dynamic JSON>"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/parking-lots/{lotId}/bookings/{userId}/{bookingId}",
+      "functions": [
+        "getBookingByIdForLot"
+      ],
+      "query": [],
+      "hasBody": false,
+      "requestTypes": [
+        "none"
+      ],
+      "responseTypes": [
+        "Booking"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.Booking"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        null
+      ],
+      "responsePatterns": [
+        {
+          "actualCheckInTime": "<ISO-8601 datetime>",
+          "actualCheckOutTime": "<ISO-8601 datetime>",
+          "amount": "<number>",
+          "archivedAt": "<ISO-8601 datetime>",
+          "autoCompleted": "<boolean>",
+          "balanceSettled": "<boolean>",
+          "bookingType": "<string>",
+          "cancelledAt": "<ISO-8601 datetime>",
+          "checkInOperatorId": "<string>",
+          "checkInTime": "<ISO-8601 datetime>",
+          "checkOutOperatorId": "<string>",
+          "checkOutTime": "<ISO-8601 datetime>",
+          "createdAt": "<ISO-8601 datetime>",
+          "endingReminderSent": "<boolean>",
+          "endingReminderSentAt": "<ISO-8601 datetime>",
+          "id": "<string>",
+          "locationId": "<string>",
+          "locationName": "<string>",
+          "lotId": "<string>",
+          "lotName": "<string>",
+          "organizationId": "<string>",
+          "organizationName": "<string>",
+          "organizationType": "<string>",
+          "paymentModel": "<string>",
+          "qrCode": "<string>",
+          "qrCodeScanned": "<boolean>",
+          "spotId": "<string>",
+          "status": "<string>",
+          "updatedAt": "<ISO-8601 datetime>",
+          "userId": "<string>",
+          "vehicleNumber": "<string>"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/parking-lots/{lotId}/spots",
+      "functions": [
+        "getParkingSpotsForLot",
+        "getParkingSpotsForLotPayload"
+      ],
+      "query": [],
+      "hasBody": false,
+      "requestTypes": [
+        "none"
+      ],
+      "responseTypes": [
+        "List<ParkingSpot>",
+        "JsonElement"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.ParkingSpot"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        null
+      ],
+      "responsePatterns": [
+        [
+          {
+            "available": "<integer>",
+            "bookingRate": "<number>",
+            "capacity": "<integer>",
+            "id": "<string>",
+            "lotId": "<string>",
+            "lotName": "<string>",
+            "name": "<string>",
+            "slotId": "<integer>",
+            "slotName": "<string>",
+            "spotCode": "<string>",
+            "status": "<string>",
+            "zoneName": "<string>"
+          }
+        ],
+        "<dynamic JSON>"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/parking-lots/{lotId}/spots/available",
+      "functions": [
+        "getAvailableSpotsForLot"
+      ],
+      "query": [
+        "startTime",
+        "endTime"
+      ],
+      "hasBody": false,
+      "requestTypes": [
+        "none"
+      ],
+      "responseTypes": [
+        "List<SpotAvailabilityInfo>"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.SpotAvailabilityInfo"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        null
+      ],
+      "responsePatterns": [
+        [
+          {
+            "availableCapacity": "<integer>",
+            "bookedCount": "<integer>",
+            "isAvailable": "<boolean>",
+            "spot": {
+              "available": "<integer>",
+              "bookingRate": "<number>",
+              "capacity": "<integer>",
+              "id": "<string>",
+              "lotId": "<string>",
+              "lotName": "<string>",
+              "name": "<string>",
+              "slotId": "<integer>",
+              "slotName": "<string>",
+              "spotCode": "<string>",
+              "status": "<string>",
+              "zoneName": "<string>"
+            }
+          }
+        ]
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/parking-lots/{lotId}/spots/{spotId}/available",
+      "functions": [
+        "isParkingSpotAvailableForLot"
+      ],
+      "query": [
+        "startTime",
+        "endTime"
+      ],
+      "hasBody": false,
+      "requestTypes": [
+        "none"
+      ],
+      "responseTypes": [
+        "boolean"
+      ],
+      "models": [],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        null
+      ],
+      "responsePatterns": [
+        "<boolean>"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/parking-spots",
+      "functions": [
+        "getParkingSpots",
+        "getParkingSpotsPayload"
+      ],
+      "query": [],
+      "hasBody": false,
+      "requestTypes": [
+        "none"
+      ],
+      "responseTypes": [
+        "List<ParkingSpot>",
+        "JsonElement"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.ParkingSpot"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        null
+      ],
+      "responsePatterns": [
+        [
+          {
+            "available": "<integer>",
+            "bookingRate": "<number>",
+            "capacity": "<integer>",
+            "id": "<string>",
+            "lotId": "<string>",
+            "lotName": "<string>",
+            "name": "<string>",
+            "slotId": "<integer>",
+            "slotName": "<string>",
+            "spotCode": "<string>",
+            "status": "<string>",
+            "zoneName": "<string>"
+          }
+        ],
+        "<dynamic JSON>"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/parking-spots/available",
+      "functions": [
+        "getAvailableSpots"
+      ],
+      "query": [
+        "lotId",
+        "startTime",
+        "endTime"
+      ],
+      "hasBody": false,
+      "requestTypes": [
+        "none"
+      ],
+      "responseTypes": [
+        "List<SpotAvailabilityInfo>"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.SpotAvailabilityInfo"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        null
+      ],
+      "responsePatterns": [
+        [
+          {
+            "availableCapacity": "<integer>",
+            "bookedCount": "<integer>",
+            "isAvailable": "<boolean>",
+            "spot": {
+              "available": "<integer>",
+              "bookingRate": "<number>",
+              "capacity": "<integer>",
+              "id": "<string>",
+              "lotId": "<string>",
+              "lotName": "<string>",
+              "name": "<string>",
+              "slotId": "<integer>",
+              "slotName": "<string>",
+              "spotCode": "<string>",
+              "status": "<string>",
+              "zoneName": "<string>"
+            }
+          }
+        ]
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/parking-spots/id/{id}",
+      "functions": [
+        "getParkingSpotById"
+      ],
+      "query": [],
+      "hasBody": false,
+      "requestTypes": [
+        "none"
+      ],
+      "responseTypes": [
+        "ParkingSpot"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.ParkingSpot"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        null
+      ],
+      "responsePatterns": [
+        {
+          "available": "<integer>",
+          "bookingRate": "<number>",
+          "capacity": "<integer>",
+          "id": "<string>",
+          "lotId": "<string>",
+          "lotName": "<string>",
+          "name": "<string>",
+          "slotId": "<integer>",
+          "slotName": "<string>",
+          "spotCode": "<string>",
+          "status": "<string>",
+          "zoneName": "<string>"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/parking-spots/lot/{lotId}",
+      "functions": [
+        "getParkingSpotsByLot",
+        "getParkingSpotsByLotPayload"
+      ],
+      "query": [],
+      "hasBody": false,
+      "requestTypes": [
+        "none"
+      ],
+      "responseTypes": [
+        "List<ParkingSpot>",
+        "JsonElement"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.ParkingSpot"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        null
+      ],
+      "responsePatterns": [
+        [
+          {
+            "available": "<integer>",
+            "bookingRate": "<number>",
+            "capacity": "<integer>",
+            "id": "<string>",
+            "lotId": "<string>",
+            "lotName": "<string>",
+            "name": "<string>",
+            "slotId": "<integer>",
+            "slotName": "<string>",
+            "spotCode": "<string>",
+            "status": "<string>",
+            "zoneName": "<string>"
+          }
+        ],
+        "<dynamic JSON>"
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/payments/initiate",
+      "functions": [
+        "initiatePayment"
+      ],
+      "query": [],
+      "hasBody": true,
+      "requestTypes": [
+        "PaymentInitiateRequest"
+      ],
+      "responseTypes": [
+        "PaymentInitiateResponse"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.PaymentInitiateRequest",
+        "com.gridee.parking.data.model.PaymentInitiateResponse"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        {
+          "amount": "<number>",
+          "locationId": "<string>",
+          "organizationId": "<string>",
+          "parkingLotId": "<string>",
+          "userId": "<string>"
+        }
+      ],
+      "responsePatterns": [
+        {
+          "environment": "<string>",
+          "gateway": "<string>",
+          "orderId": "<string>",
+          "paymentSessionId": "<string>"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/payments/status/{orderId}",
+      "functions": [
+        "getPaymentStatus"
+      ],
+      "query": [],
+      "hasBody": false,
+      "requestTypes": [
+        "none"
+      ],
+      "responseTypes": [
+        "PaymentStatusResponse"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.PaymentStatusResponse"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        null
+      ],
+      "responsePatterns": [
+        {
+          "amount": "<number>",
+          "currency": "<string>",
+          "gateway": "<string>",
+          "gatewayPaymentId": "<string>",
+          "locationId": "<string>",
+          "locationName": "<string>",
+          "message": "<string>",
+          "orderId": "<string>",
+          "organizationId": "<string>",
+          "organizationName": "<string>",
+          "parkingLotId": "<string>",
+          "parkingLotName": "<string>",
+          "status": "<string>",
+          "walletCredited": "<boolean>"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/support/tickets",
+      "functions": [
+        "createSupportTicket"
+      ],
+      "query": [],
+      "hasBody": true,
+      "requestTypes": [
+        "CreateSupportTicketRequest"
+      ],
+      "responseTypes": [
+        "SupportTicket"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.CreateSupportTicketRequest",
+        "com.gridee.parking.data.model.SupportTicket"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        {
+          "description": "<string>",
+          "parkingLotId": "<string>",
+          "parkingLotName": "<string>",
+          "priority": "<string>",
+          "subject": "<string>"
+        }
+      ],
+      "responsePatterns": [
+        {
+          "createdAt": "<ISO-8601 datetime>",
+          "description": "<string>",
+          "id": "<string>",
+          "messages": [
+            {
+              "message": "<string>",
+              "messageId": "<string>",
+              "senderId": "<string>",
+              "senderRole": "<string>",
+              "sentAt": "<ISO-8601 datetime>"
+            }
+          ],
+          "parkingLotId": "<string>",
+          "parkingLotName": "<string>",
+          "priority": "<string>",
+          "resolvedAt": "<ISO-8601 datetime>",
+          "resolvedBy": "<string>",
+          "status": "<string>",
+          "subject": "<string>",
+          "updatedAt": "<ISO-8601 datetime>",
+          "userEmail": "<string>",
+          "userId": "<string>",
+          "userName": "<string>"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/support/tickets/my",
+      "functions": [
+        "getMySupportTickets"
+      ],
+      "query": [],
+      "hasBody": false,
+      "requestTypes": [
+        "none"
+      ],
+      "responseTypes": [
+        "List<SupportTicket>"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.SupportTicket"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        null
+      ],
+      "responsePatterns": [
+        [
+          {
+            "createdAt": "<ISO-8601 datetime>",
+            "description": "<string>",
+            "id": "<string>",
+            "messages": [
+              {
+                "message": "<string>",
+                "messageId": "<string>",
+                "senderId": "<string>",
+                "senderRole": "<string>",
+                "sentAt": "<ISO-8601 datetime>"
+              }
+            ],
+            "parkingLotId": "<string>",
+            "parkingLotName": "<string>",
+            "priority": "<string>",
+            "resolvedAt": "<ISO-8601 datetime>",
+            "resolvedBy": "<string>",
+            "status": "<string>",
+            "subject": "<string>",
+            "updatedAt": "<ISO-8601 datetime>",
+            "userEmail": "<string>",
+            "userId": "<string>",
+            "userName": "<string>"
+          }
+        ]
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/support/tickets/{ticketId}",
+      "functions": [
+        "getSupportTicket"
+      ],
+      "query": [],
+      "hasBody": false,
+      "requestTypes": [
+        "none"
+      ],
+      "responseTypes": [
+        "SupportTicket"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.SupportTicket"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        null
+      ],
+      "responsePatterns": [
+        {
+          "createdAt": "<ISO-8601 datetime>",
+          "description": "<string>",
+          "id": "<string>",
+          "messages": [
+            {
+              "message": "<string>",
+              "messageId": "<string>",
+              "senderId": "<string>",
+              "senderRole": "<string>",
+              "sentAt": "<ISO-8601 datetime>"
+            }
+          ],
+          "parkingLotId": "<string>",
+          "parkingLotName": "<string>",
+          "priority": "<string>",
+          "resolvedAt": "<ISO-8601 datetime>",
+          "resolvedBy": "<string>",
+          "status": "<string>",
+          "subject": "<string>",
+          "updatedAt": "<ISO-8601 datetime>",
+          "userEmail": "<string>",
+          "userId": "<string>",
+          "userName": "<string>"
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/support/tickets/{ticketId}/messages",
+      "functions": [
+        "addSupportTicketMessage"
+      ],
+      "query": [],
+      "hasBody": true,
+      "requestTypes": [
+        "AddSupportTicketMessageRequest"
+      ],
+      "responseTypes": [
+        "SupportTicket"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.AddSupportTicketMessageRequest",
+        "com.gridee.parking.data.model.SupportTicket"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        {
+          "message": "<string>"
+        }
+      ],
+      "responsePatterns": [
+        {
+          "createdAt": "<ISO-8601 datetime>",
+          "description": "<string>",
+          "id": "<string>",
+          "messages": [
+            {
+              "message": "<string>",
+              "messageId": "<string>",
+              "senderId": "<string>",
+              "senderRole": "<string>",
+              "sentAt": "<ISO-8601 datetime>"
+            }
+          ],
+          "parkingLotId": "<string>",
+          "parkingLotName": "<string>",
+          "priority": "<string>",
+          "resolvedAt": "<ISO-8601 datetime>",
+          "resolvedBy": "<string>",
+          "status": "<string>",
+          "subject": "<string>",
+          "updatedAt": "<ISO-8601 datetime>",
+          "userEmail": "<string>",
+          "userId": "<string>",
+          "userName": "<string>"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/users/{id}",
+      "functions": [
+        "getUserById"
+      ],
+      "query": [],
+      "hasBody": false,
+      "requestTypes": [
+        "none"
+      ],
+      "responseTypes": [
+        "User"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.User"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        null
+      ],
+      "responsePatterns": [
+        {
+          "defaultVehicle": "<string>",
+          "email": "<string>",
+          "firstUser": "<boolean>",
+          "id": "<string>",
+          "name": "<string>",
+          "parkingLotId": "<string>",
+          "parkingLotName": "<string>",
+          "phone": "<string>",
+          "role": "<string>",
+          "vehicleNumbers": [
+            "<string>"
+          ],
+          "walletCoins": "<integer>"
+        }
+      ]
+    },
+    {
+      "method": "PUT",
+      "route": "/api/users/{id}",
+      "functions": [
+        "updateUser"
+      ],
+      "query": [],
+      "hasBody": true,
+      "requestTypes": [
+        "UpdateUserRequest"
+      ],
+      "responseTypes": [
+        "null"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.UpdateUserRequest"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        {
+          "email": "<string>",
+          "name": "<string>",
+          "parkingLotId": "<string>",
+          "parkingLotName": "<string>",
+          "password": "<string>",
+          "phone": "<string>",
+          "vehicleNumbers": [
+            "<string>"
+          ]
+        }
+      ],
+      "responsePatterns": [
+        null
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/users/{userId}/wallet",
+      "functions": [
+        "getWalletDetails"
+      ],
+      "query": [],
+      "hasBody": false,
+      "requestTypes": [
+        "none"
+      ],
+      "responseTypes": [
+        "WalletDetails"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.WalletDetails"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        null
+      ],
+      "responsePatterns": [
+        {
+          "balance": "<number>",
+          "transactions": [
+            {
+              "amount": "<number>",
+              "balanceAfter": "<number>",
+              "bookingId": "<string>",
+              "currency": "<string>",
+              "description": "<string>",
+              "failureReason": "<string>",
+              "gateway": "<string>",
+              "id": "<string>",
+              "lotId": "<string>",
+              "lotName": "<string>",
+              "method": "<string>",
+              "referenceId": "<string>",
+              "spotId": "<string>",
+              "status": "<string>",
+              "timestamp": "<string>",
+              "type": "<string>"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/users/{userId}/wallet/topup",
+      "functions": [
+        "topUpWallet"
+      ],
+      "query": [],
+      "hasBody": true,
+      "requestTypes": [
+        "TopUpRequest"
+      ],
+      "responseTypes": [
+        "TopUpResponse"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.TopUpRequest",
+        "com.gridee.parking.data.model.TopUpResponse"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        {
+          "amount": "<number>"
+        }
+      ],
+      "responsePatterns": [
+        {
+          "amount": "<number>",
+          "balance": "<number>",
+          "currency": "<string>",
+          "orderId": "<string>"
+        }
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/users/{userId}/wallet/transactions",
+      "functions": [
+        "getWalletTransactions"
+      ],
+      "query": [
+        "page",
+        "size",
+        "sort"
+      ],
+      "hasBody": false,
+      "requestTypes": [
+        "none"
+      ],
+      "responseTypes": [
+        "WalletTransactionsResponse"
+      ],
+      "models": [
+        "com.gridee.parking.data.model.WalletTransactionsResponse"
+      ],
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ],
+      "requestPatterns": [
+        null
+      ],
+      "responsePatterns": [
+        {
+          "content": [
+            {
+              "amount": "<number>",
+              "balanceAfter": "<number>",
+              "bookingId": "<string>",
+              "currency": "<string>",
+              "description": "<string>",
+              "failureReason": "<string>",
+              "gateway": "<string>",
+              "id": "<string>",
+              "lotId": "<string>",
+              "lotName": "<string>",
+              "method": "<string>",
+              "referenceId": "<string>",
+              "spotId": "<string>",
+              "status": "<string>",
+              "timestamp": "<string>",
+              "type": "<string>"
+            }
+          ],
+          "last": "<boolean>",
+          "number": "<integer>",
+          "totalElements": "<integer>",
+          "totalPages": "<integer>"
+        }
+      ]
+    }
+  ],
+  "models": {
+    "com.gridee.parking.data.model.AddSupportTicketMessageRequest": {
+      "fields": [
+        {
+          "name": "message",
+          "type": "string"
+        }
+      ],
+      "pattern": {
+        "message": "<string>"
+      }
+    },
+    "com.gridee.parking.data.model.AppConfigResponse": {
+      "fields": [
+        {
+          "name": "data",
+          "type": "AppRemoteConfig"
+        },
+        {
+          "name": "error",
+          "type": "string"
+        },
+        {
+          "name": "message",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "type": "integer"
+        },
+        {
+          "name": "success",
+          "type": "boolean"
+        },
+        {
+          "name": "timestamp",
+          "type": "integer"
+        }
+      ],
+      "pattern": {
+        "data": "<AppRemoteConfig>",
+        "error": "<string>",
+        "message": "<string>",
+        "status": "<integer>",
+        "success": "<boolean>",
+        "timestamp": "<integer>"
+      }
+    },
+    "com.gridee.parking.data.model.AppRemoteConfig": {
+      "fields": [
+        {
+          "name": "booking",
+          "type": "RemoteBookingSettings"
+        },
+        {
+          "name": "cacheTtlSeconds",
+          "type": "integer"
+        },
+        {
+          "name": "createdAt",
+          "type": "integer"
+        },
+        {
+          "name": "customSettings",
+          "type": "Map<string, object>"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        },
+        {
+          "name": "features",
+          "type": "RemoteFeatureFlags"
+        },
+        {
+          "name": "financial",
+          "type": "RemoteFinancialSettings"
+        },
+        {
+          "name": "home",
+          "type": "RemoteHomeSettings"
+        },
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "lastUpdatedAt",
+          "type": "integer"
+        },
+        {
+          "name": "notification",
+          "type": "RemoteNotificationSettings"
+        },
+        {
+          "name": "platform",
+          "type": "RemotePlatformSettings"
+        },
+        {
+          "name": "schemaVersion",
+          "type": "integer"
+        },
+        {
+          "name": "updatedBy",
+          "type": "string"
+        },
+        {
+          "name": "versions",
+          "type": "RemoteAppVersions"
+        }
+      ],
+      "pattern": {
+        "booking": "<RemoteBookingSettings>",
+        "cacheTtlSeconds": "<integer>",
+        "createdAt": "<integer>",
+        "customSettings": "<Map<string, object>>",
+        "description": "<string>",
+        "features": "<RemoteFeatureFlags>",
+        "financial": "<RemoteFinancialSettings>",
+        "home": "<RemoteHomeSettings>",
+        "id": "<string>",
+        "lastUpdatedAt": "<integer>",
+        "notification": "<RemoteNotificationSettings>",
+        "platform": "<RemotePlatformSettings>",
+        "schemaVersion": "<integer>",
+        "updatedBy": "<string>",
+        "versions": "<RemoteAppVersions>"
+      }
+    },
+    "com.gridee.parking.data.model.AuthRequest": {
+      "fields": [
+        {
+          "name": "email",
+          "type": "string"
+        },
+        {
+          "name": "password",
+          "type": "string"
+        }
+      ],
+      "pattern": {
+        "email": "<string>",
+        "password": "<string>"
+      }
+    },
+    "com.gridee.parking.data.model.AuthResponse": {
+      "fields": [
+        {
+          "name": "isNewUser",
+          "type": "boolean"
+        },
+        {
+          "name": "message",
+          "type": "string"
+        },
+        {
+          "name": "mfaEnabled",
+          "type": "boolean"
+        },
+        {
+          "name": "mfaRequired",
+          "type": "boolean"
+        },
+        {
+          "name": "profileComplete",
+          "type": "boolean"
+        },
+        {
+          "name": "requiresProfileCompletion",
+          "type": "boolean"
+        },
+        {
+          "name": "token",
+          "type": "string"
+        },
+        {
+          "name": "tokenType",
+          "type": "string"
+        },
+        {
+          "name": "user",
+          "type": "UserResponseDto"
+        }
+      ],
+      "pattern": {
+        "isNewUser": "<boolean>",
+        "message": "<string>",
+        "mfaEnabled": "<boolean>",
+        "mfaRequired": "<boolean>",
+        "profileComplete": "<boolean>",
+        "requiresProfileCompletion": "<boolean>",
+        "token": "<string>",
+        "tokenType": "<string>",
+        "user": "<UserResponseDto>"
+      }
+    },
+    "com.gridee.parking.data.model.Booking": {
+      "fields": [
+        {
+          "name": "actualCheckInTime",
+          "type": "Date"
+        },
+        {
+          "name": "actualCheckOutTime",
+          "type": "Date"
+        },
+        {
+          "name": "amount",
+          "type": "number"
+        },
+        {
+          "name": "archivedAt",
+          "type": "Date"
+        },
+        {
+          "name": "autoCompleted",
+          "type": "boolean"
+        },
+        {
+          "name": "balanceSettled",
+          "type": "boolean"
+        },
+        {
+          "name": "bookingType",
+          "type": "string"
+        },
+        {
+          "name": "cancelledAt",
+          "type": "Date"
+        },
+        {
+          "name": "checkInOperatorId",
+          "type": "string"
+        },
+        {
+          "name": "checkInTime",
+          "type": "Date"
+        },
+        {
+          "name": "checkOutOperatorId",
+          "type": "string"
+        },
+        {
+          "name": "checkOutTime",
+          "type": "Date"
+        },
+        {
+          "name": "createdAt",
+          "type": "Date"
+        },
+        {
+          "name": "endingReminderSent",
+          "type": "boolean"
+        },
+        {
+          "name": "endingReminderSentAt",
+          "type": "Date"
+        },
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "locationId",
+          "type": "string"
+        },
+        {
+          "name": "locationName",
+          "type": "string"
+        },
+        {
+          "name": "lotId",
+          "type": "string"
+        },
+        {
+          "name": "lotName",
+          "type": "string"
+        },
+        {
+          "name": "organizationId",
+          "type": "string"
+        },
+        {
+          "name": "organizationName",
+          "type": "string"
+        },
+        {
+          "name": "organizationType",
+          "type": "string"
+        },
+        {
+          "name": "paymentModel",
+          "type": "string"
+        },
+        {
+          "name": "qrCode",
+          "type": "string"
+        },
+        {
+          "name": "qrCodeScanned",
+          "type": "boolean"
+        },
+        {
+          "name": "spotId",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "type": "string"
+        },
+        {
+          "name": "updatedAt",
+          "type": "Date"
+        },
+        {
+          "name": "userId",
+          "type": "string"
+        },
+        {
+          "name": "vehicleNumber",
+          "type": "string"
+        }
+      ],
+      "pattern": {
+        "actualCheckInTime": "<Date>",
+        "actualCheckOutTime": "<Date>",
+        "amount": "<number>",
+        "archivedAt": "<Date>",
+        "autoCompleted": "<boolean>",
+        "balanceSettled": "<boolean>",
+        "bookingType": "<string>",
+        "cancelledAt": "<Date>",
+        "checkInOperatorId": "<string>",
+        "checkInTime": "<Date>",
+        "checkOutOperatorId": "<string>",
+        "checkOutTime": "<Date>",
+        "createdAt": "<Date>",
+        "endingReminderSent": "<boolean>",
+        "endingReminderSentAt": "<Date>",
+        "id": "<string>",
+        "locationId": "<string>",
+        "locationName": "<string>",
+        "lotId": "<string>",
+        "lotName": "<string>",
+        "organizationId": "<string>",
+        "organizationName": "<string>",
+        "organizationType": "<string>",
+        "paymentModel": "<string>",
+        "qrCode": "<string>",
+        "qrCodeScanned": "<boolean>",
+        "spotId": "<string>",
+        "status": "<string>",
+        "updatedAt": "<Date>",
+        "userId": "<string>",
+        "vehicleNumber": "<string>"
+      }
+    },
+    "com.gridee.parking.data.model.CheckInMode": {
+      "fields": [],
+      "pattern": {}
+    },
+    "com.gridee.parking.data.model.CheckInRequest": {
+      "fields": [
+        {
+          "name": "mode",
+          "type": "CheckInMode"
+        },
+        {
+          "name": "parkingLotId",
+          "type": "string"
+        },
+        {
+          "name": "parkingSpotId",
+          "type": "string"
+        },
+        {
+          "name": "pin",
+          "type": "string"
+        },
+        {
+          "name": "qrCode",
+          "type": "string"
+        },
+        {
+          "name": "vehicleNumber",
+          "type": "string"
+        }
+      ],
+      "pattern": {
+        "mode": "<CheckInMode>",
+        "parkingLotId": "<string>",
+        "parkingSpotId": "<string>",
+        "pin": "<string>",
+        "qrCode": "<string>",
+        "vehicleNumber": "<string>"
+      }
+    },
+    "com.gridee.parking.data.model.CreateBookingRequest": {
+      "fields": [
+        {
+          "name": "checkInTime",
+          "type": "string"
+        },
+        {
+          "name": "checkOutTime",
+          "type": "string"
+        },
+        {
+          "name": "lotId",
+          "type": "string"
+        },
+        {
+          "name": "spotId",
+          "type": "string"
+        },
+        {
+          "name": "vehicleNumber",
+          "type": "string"
+        }
+      ],
+      "pattern": {
+        "checkInTime": "<string>",
+        "checkOutTime": "<string>",
+        "lotId": "<string>",
+        "spotId": "<string>",
+        "vehicleNumber": "<string>"
+      }
+    },
+    "com.gridee.parking.data.model.CreateSupportTicketRequest": {
+      "fields": [
+        {
+          "name": "description",
+          "type": "string"
+        },
+        {
+          "name": "parkingLotId",
+          "type": "string"
+        },
+        {
+          "name": "parkingLotName",
+          "type": "string"
+        },
+        {
+          "name": "priority",
+          "type": "string"
+        },
+        {
+          "name": "subject",
+          "type": "string"
+        }
+      ],
+      "pattern": {
+        "description": "<string>",
+        "parkingLotId": "<string>",
+        "parkingLotName": "<string>",
+        "priority": "<string>",
+        "subject": "<string>"
+      }
+    },
+    "com.gridee.parking.data.model.DeviceTokenRegisterRequest": {
+      "fields": [
+        {
+          "name": "appVersion",
+          "type": "string"
+        },
+        {
+          "name": "deviceId",
+          "type": "string"
+        },
+        {
+          "name": "platform",
+          "type": "string"
+        },
+        {
+          "name": "token",
+          "type": "string"
+        }
+      ],
+      "pattern": {
+        "appVersion": "<string>",
+        "deviceId": "<string>",
+        "platform": "<string>",
+        "token": "<string>"
+      }
+    },
+    "com.gridee.parking.data.model.DeviceTokenUnregisterRequest": {
+      "fields": [
+        {
+          "name": "token",
+          "type": "string"
+        }
+      ],
+      "pattern": {
+        "token": "<string>"
+      }
+    },
+    "com.gridee.parking.data.model.FirebaseTokenExchangeRequest": {
+      "fields": [
+        {
+          "name": "idToken",
+          "type": "string"
+        }
+      ],
+      "pattern": {
+        "idToken": "<string>"
+      }
+    },
+    "com.gridee.parking.data.model.ParkingLot": {
+      "fields": [
+        {
+          "name": "active",
+          "type": "boolean"
+        },
+        {
+          "name": "address",
+          "type": "string"
+        },
+        {
+          "name": "availableSpots",
+          "type": "integer"
+        },
+        {
+          "name": "bookingPolicy",
+          "type": "ParkingLotBookingPolicy"
+        },
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "latitude",
+          "type": "number"
+        },
+        {
+          "name": "location",
+          "type": "string"
+        },
+        {
+          "name": "locationId",
+          "type": "string"
+        },
+        {
+          "name": "locationName",
+          "type": "string"
+        },
+        {
+          "name": "longitude",
+          "type": "number"
+        },
+        {
+          "name": "lotType",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "organizationId",
+          "type": "string"
+        },
+        {
+          "name": "organizationName",
+          "type": "string"
+        },
+        {
+          "name": "organizationType",
+          "type": "string"
+        },
+        {
+          "name": "paymentModel",
+          "type": "string"
+        },
+        {
+          "name": "totalSpots",
+          "type": "integer"
+        }
+      ],
+      "pattern": {
+        "active": "<boolean>",
+        "address": "<string>",
+        "availableSpots": "<integer>",
+        "bookingPolicy": "<ParkingLotBookingPolicy>",
+        "id": "<string>",
+        "latitude": "<number>",
+        "location": "<string>",
+        "locationId": "<string>",
+        "locationName": "<string>",
+        "longitude": "<number>",
+        "lotType": "<string>",
+        "name": "<string>",
+        "organizationId": "<string>",
+        "organizationName": "<string>",
+        "organizationType": "<string>",
+        "paymentModel": "<string>",
+        "totalSpots": "<integer>"
+      }
+    },
+    "com.gridee.parking.data.model.ParkingLotBookingPolicy": {
+      "fields": [
+        {
+          "name": "accessTypes",
+          "type": "List<string>"
+        },
+        {
+          "name": "advanceBookingDays",
+          "type": "integer"
+        },
+        {
+          "name": "allowAdvanceBooking",
+          "type": "boolean"
+        },
+        {
+          "name": "allowOvernightBookings",
+          "type": "boolean"
+        },
+        {
+          "name": "allowWalkIn",
+          "type": "boolean"
+        },
+        {
+          "name": "bookingMode",
+          "type": "string"
+        },
+        {
+          "name": "bookingRequired",
+          "type": "boolean"
+        },
+        {
+          "name": "dailyBookingEndTime",
+          "type": "string"
+        },
+        {
+          "name": "fixedTimeSlotsEnabled",
+          "type": "boolean"
+        },
+        {
+          "name": "nextDayBookingOpenTime",
+          "type": "string"
+        },
+        {
+          "name": "paymentModel",
+          "type": "string"
+        },
+        {
+          "name": "paymentRequired",
+          "type": "boolean"
+        },
+        {
+          "name": "penaltyEnabled",
+          "type": "boolean"
+        },
+        {
+          "name": "pricingType",
+          "type": "string"
+        },
+        {
+          "name": "refundPolicy",
+          "type": "string"
+        },
+        {
+          "name": "requiresResidentApproval",
+          "type": "boolean"
+        },
+        {
+          "name": "requiresUserVerification",
+          "type": "boolean"
+        },
+        {
+          "name": "requiresVehicleRegistration",
+          "type": "boolean"
+        },
+        {
+          "name": "supportsANPR",
+          "type": "boolean"
+        },
+        {
+          "name": "supportsOperatorValidation",
+          "type": "boolean"
+        },
+        {
+          "name": "supportsQRCode",
+          "type": "boolean"
+        },
+        {
+          "name": "validationMode",
+          "type": "string"
+        },
+        {
+          "name": "welcomeBonusAmount",
+          "type": "number"
+        }
+      ],
+      "pattern": {
+        "accessTypes": "<List<string>>",
+        "advanceBookingDays": "<integer>",
+        "allowAdvanceBooking": "<boolean>",
+        "allowOvernightBookings": "<boolean>",
+        "allowWalkIn": "<boolean>",
+        "bookingMode": "<string>",
+        "bookingRequired": "<boolean>",
+        "dailyBookingEndTime": "<string>",
+        "fixedTimeSlotsEnabled": "<boolean>",
+        "nextDayBookingOpenTime": "<string>",
+        "paymentModel": "<string>",
+        "paymentRequired": "<boolean>",
+        "penaltyEnabled": "<boolean>",
+        "pricingType": "<string>",
+        "refundPolicy": "<string>",
+        "requiresResidentApproval": "<boolean>",
+        "requiresUserVerification": "<boolean>",
+        "requiresVehicleRegistration": "<boolean>",
+        "supportsANPR": "<boolean>",
+        "supportsOperatorValidation": "<boolean>",
+        "supportsQRCode": "<boolean>",
+        "validationMode": "<string>",
+        "welcomeBonusAmount": "<number>"
+      }
+    },
+    "com.gridee.parking.data.model.ParkingSpot": {
+      "fields": [
+        {
+          "name": "available",
+          "type": "integer"
+        },
+        {
+          "name": "bookingRate",
+          "type": "number"
+        },
+        {
+          "name": "capacity",
+          "type": "integer"
+        },
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "lotId",
+          "type": "string"
+        },
+        {
+          "name": "lotName",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "slotId",
+          "type": "integer"
+        },
+        {
+          "name": "slotName",
+          "type": "string"
+        },
+        {
+          "name": "spotCode",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "type": "string"
+        },
+        {
+          "name": "zoneName",
+          "type": "string"
+        }
+      ],
+      "pattern": {
+        "available": "<integer>",
+        "bookingRate": "<number>",
+        "capacity": "<integer>",
+        "id": "<string>",
+        "lotId": "<string>",
+        "lotName": "<string>",
+        "name": "<string>",
+        "slotId": "<integer>",
+        "slotName": "<string>",
+        "spotCode": "<string>",
+        "status": "<string>",
+        "zoneName": "<string>"
+      }
+    },
+    "com.gridee.parking.data.model.PaymentInitiateRequest": {
+      "fields": [
+        {
+          "name": "amount",
+          "type": "number"
+        },
+        {
+          "name": "locationId",
+          "type": "string"
+        },
+        {
+          "name": "organizationId",
+          "type": "string"
+        },
+        {
+          "name": "parkingLotId",
+          "type": "string"
+        },
+        {
+          "name": "userId",
+          "type": "string"
+        }
+      ],
+      "pattern": {
+        "amount": "<number>",
+        "locationId": "<string>",
+        "organizationId": "<string>",
+        "parkingLotId": "<string>",
+        "userId": "<string>"
+      }
+    },
+    "com.gridee.parking.data.model.PaymentInitiateResponse": {
+      "fields": [
+        {
+          "name": "environment",
+          "type": "string"
+        },
+        {
+          "name": "gateway",
+          "type": "string"
+        },
+        {
+          "name": "orderId",
+          "type": "string"
+        },
+        {
+          "name": "paymentSessionId",
+          "type": "string"
+        }
+      ],
+      "pattern": {
+        "environment": "<string>",
+        "gateway": "<string>",
+        "orderId": "<string>",
+        "paymentSessionId": "<string>"
+      }
+    },
+    "com.gridee.parking.data.model.PaymentStatusResponse": {
+      "fields": [
+        {
+          "name": "amount",
+          "type": "number"
+        },
+        {
+          "name": "currency",
+          "type": "string"
+        },
+        {
+          "name": "gateway",
+          "type": "string"
+        },
+        {
+          "name": "gatewayPaymentId",
+          "type": "string"
+        },
+        {
+          "name": "locationId",
+          "type": "string"
+        },
+        {
+          "name": "locationName",
+          "type": "string"
+        },
+        {
+          "name": "message",
+          "type": "string"
+        },
+        {
+          "name": "orderId",
+          "type": "string"
+        },
+        {
+          "name": "organizationId",
+          "type": "string"
+        },
+        {
+          "name": "organizationName",
+          "type": "string"
+        },
+        {
+          "name": "parkingLotId",
+          "type": "string"
+        },
+        {
+          "name": "parkingLotName",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "type": "string"
+        },
+        {
+          "name": "walletCredited",
+          "type": "boolean"
+        }
+      ],
+      "pattern": {
+        "amount": "<number>",
+        "currency": "<string>",
+        "gateway": "<string>",
+        "gatewayPaymentId": "<string>",
+        "locationId": "<string>",
+        "locationName": "<string>",
+        "message": "<string>",
+        "orderId": "<string>",
+        "organizationId": "<string>",
+        "organizationName": "<string>",
+        "parkingLotId": "<string>",
+        "parkingLotName": "<string>",
+        "status": "<string>",
+        "walletCredited": "<boolean>"
+      }
+    },
+    "com.gridee.parking.data.model.RemoteAppVersions": {
+      "fields": [
+        {
+          "name": "androidPlayStoreUrl",
+          "type": "string"
+        },
+        {
+          "name": "androidUpdateMessage",
+          "type": "string"
+        },
+        {
+          "name": "forceAndroidUpdate",
+          "type": "boolean"
+        },
+        {
+          "name": "forceIOSUpdate",
+          "type": "boolean"
+        },
+        {
+          "name": "iosAppStoreUrl",
+          "type": "string"
+        },
+        {
+          "name": "iosUpdateMessage",
+          "type": "string"
+        },
+        {
+          "name": "latestAndroidVersion",
+          "type": "string"
+        },
+        {
+          "name": "latestAndroidVersionCode",
+          "type": "integer"
+        },
+        {
+          "name": "latestIOSVersion",
+          "type": "string"
+        },
+        {
+          "name": "minAndroidVersion",
+          "type": "string"
+        },
+        {
+          "name": "minAndroidVersionCode",
+          "type": "integer"
+        },
+        {
+          "name": "minIOSVersion",
+          "type": "string"
+        },
+        {
+          "name": "recommendedAndroidUpdate",
+          "type": "boolean"
+        },
+        {
+          "name": "recommendedIOSUpdate",
+          "type": "boolean"
+        },
+        {
+          "name": "webVersion",
+          "type": "string"
+        }
+      ],
+      "pattern": {
+        "androidPlayStoreUrl": "<string>",
+        "androidUpdateMessage": "<string>",
+        "forceAndroidUpdate": "<boolean>",
+        "forceIOSUpdate": "<boolean>",
+        "iosAppStoreUrl": "<string>",
+        "iosUpdateMessage": "<string>",
+        "latestAndroidVersion": "<string>",
+        "latestAndroidVersionCode": "<integer>",
+        "latestIOSVersion": "<string>",
+        "minAndroidVersion": "<string>",
+        "minAndroidVersionCode": "<integer>",
+        "minIOSVersion": "<string>",
+        "recommendedAndroidUpdate": "<boolean>",
+        "recommendedIOSUpdate": "<boolean>",
+        "webVersion": "<string>"
+      }
+    },
+    "com.gridee.parking.data.model.RemoteBookingSettings": {
+      "fields": [
+        {
+          "name": "allowSequentialBookings",
+          "type": "boolean"
+        },
+        {
+          "name": "autoActivateNextBooking",
+          "type": "boolean"
+        },
+        {
+          "name": "autoFinalizeOverdueCheckoutMinutes",
+          "type": "integer"
+        },
+        {
+          "name": "autoFinalizeOverdueCheckouts",
+          "type": "boolean"
+        },
+        {
+          "name": "bookingValidationRules",
+          "type": "Map<string, object>"
+        },
+        {
+          "name": "maxBookingDurationHours",
+          "type": "integer"
+        },
+        {
+          "name": "maxConcurrentBookingsPerUser",
+          "type": "integer"
+        },
+        {
+          "name": "maxPricingPerHour",
+          "type": "number"
+        },
+        {
+          "name": "maxSequentialBookings",
+          "type": "integer"
+        },
+        {
+          "name": "minBookingDurationMinutes",
+          "type": "integer"
+        },
+        {
+          "name": "noShowGraceMinutes",
+          "type": "integer"
+        }
+      ],
+      "pattern": {
+        "allowSequentialBookings": "<boolean>",
+        "autoActivateNextBooking": "<boolean>",
+        "autoFinalizeOverdueCheckoutMinutes": "<integer>",
+        "autoFinalizeOverdueCheckouts": "<boolean>",
+        "bookingValidationRules": "<Map<string, object>>",
+        "maxBookingDurationHours": "<integer>",
+        "maxConcurrentBookingsPerUser": "<integer>",
+        "maxPricingPerHour": "<number>",
+        "maxSequentialBookings": "<integer>",
+        "minBookingDurationMinutes": "<integer>",
+        "noShowGraceMinutes": "<integer>"
+      }
+    },
+    "com.gridee.parking.data.model.RemoteFeatureFlags": {
+      "fields": [
+        {
+          "name": "adMobEnabled",
+          "type": "boolean"
+        },
+        {
+          "name": "bookingFeatureEnabled",
+          "type": "boolean"
+        },
+        {
+          "name": "bookingTransitionInterstitialEnabled",
+          "type": "boolean"
+        },
+        {
+          "name": "bookingTransitionPreloadBufferEnabled",
+          "type": "boolean"
+        },
+        {
+          "name": "emailNotificationsEnabled",
+          "type": "boolean"
+        },
+        {
+          "name": "emailSignInEnabled",
+          "type": "boolean"
+        },
+        {
+          "name": "featureToggleMap",
+          "type": "Map<string, boolean>"
+        },
+        {
+          "name": "googleSignInEnabled",
+          "type": "boolean"
+        },
+        {
+          "name": "locationTrackingEnabled",
+          "type": "boolean"
+        },
+        {
+          "name": "maintenanceMessage",
+          "type": "string"
+        },
+        {
+          "name": "maintenanceMode",
+          "type": "boolean"
+        },
+        {
+          "name": "maintenanceTitle",
+          "type": "string"
+        },
+        {
+          "name": "multipleBookingsAllowed",
+          "type": "boolean"
+        },
+        {
+          "name": "notificationsEnabled",
+          "type": "boolean"
+        },
+        {
+          "name": "pushNotificationsEnabled",
+          "type": "boolean"
+        },
+        {
+          "name": "rateLimitingEnabled",
+          "type": "boolean"
+        },
+        {
+          "name": "rewardedDailyCapEnabled",
+          "type": "boolean"
+        },
+        {
+          "name": "rewardsEnabled",
+          "type": "boolean"
+        },
+        {
+          "name": "sequentialBookingEnabled",
+          "type": "boolean"
+        },
+        {
+          "name": "walletFeatureEnabled",
+          "type": "boolean"
+        }
+      ],
+      "pattern": {
+        "adMobEnabled": "<boolean>",
+        "bookingFeatureEnabled": "<boolean>",
+        "bookingTransitionInterstitialEnabled": "<boolean>",
+        "bookingTransitionPreloadBufferEnabled": "<boolean>",
+        "emailNotificationsEnabled": "<boolean>",
+        "emailSignInEnabled": "<boolean>",
+        "featureToggleMap": "<Map<string, boolean>>",
+        "googleSignInEnabled": "<boolean>",
+        "locationTrackingEnabled": "<boolean>",
+        "maintenanceMessage": "<string>",
+        "maintenanceMode": "<boolean>",
+        "maintenanceTitle": "<string>",
+        "multipleBookingsAllowed": "<boolean>",
+        "notificationsEnabled": "<boolean>",
+        "pushNotificationsEnabled": "<boolean>",
+        "rateLimitingEnabled": "<boolean>",
+        "rewardedDailyCapEnabled": "<boolean>",
+        "rewardsEnabled": "<boolean>",
+        "sequentialBookingEnabled": "<boolean>",
+        "walletFeatureEnabled": "<boolean>"
+      }
+    },
+    "com.gridee.parking.data.model.RemoteFinancialSettings": {
+      "fields": [
+        {
+          "name": "cancellationRefundFullRefundHours",
+          "type": "number"
+        },
+        {
+          "name": "cancellationRefundPartialPercentage",
+          "type": "number"
+        },
+        {
+          "name": "cancellationRefundPartialRefundHours",
+          "type": "number"
+        },
+        {
+          "name": "customCharges",
+          "type": "Map<string, number>"
+        },
+        {
+          "name": "lateCheckoutGracePeriodMinutes",
+          "type": "number"
+        },
+        {
+          "name": "lateCheckoutPenaltyPerMin",
+          "type": "number"
+        },
+        {
+          "name": "maxLateCheckoutPenaltyPerMin",
+          "type": "number"
+        },
+        {
+          "name": "maxWalletTopUpAmount",
+          "type": "number"
+        },
+        {
+          "name": "minWalletTopUpAmount",
+          "type": "number"
+        },
+        {
+          "name": "noShowDeduction",
+          "type": "number"
+        },
+        {
+          "name": "overdueCheckoutPenaltyPercentage",
+          "type": "number"
+        },
+        {
+          "name": "paymentGatewayTaxPercentage",
+          "type": "number"
+        },
+        {
+          "name": "penaltyEscalationIntervalMins",
+          "type": "integer"
+        },
+        {
+          "name": "welcomeBonusAmount",
+          "type": "number"
+        }
+      ],
+      "pattern": {
+        "cancellationRefundFullRefundHours": "<number>",
+        "cancellationRefundPartialPercentage": "<number>",
+        "cancellationRefundPartialRefundHours": "<number>",
+        "customCharges": "<Map<string, number>>",
+        "lateCheckoutGracePeriodMinutes": "<number>",
+        "lateCheckoutPenaltyPerMin": "<number>",
+        "maxLateCheckoutPenaltyPerMin": "<number>",
+        "maxWalletTopUpAmount": "<number>",
+        "minWalletTopUpAmount": "<number>",
+        "noShowDeduction": "<number>",
+        "overdueCheckoutPenaltyPercentage": "<number>",
+        "paymentGatewayTaxPercentage": "<number>",
+        "penaltyEscalationIntervalMins": "<integer>",
+        "welcomeBonusAmount": "<number>"
+      }
+    },
+    "com.gridee.parking.data.model.RemoteHomeSettings": {
+      "fields": [
+        {
+          "name": "showSlotFilters",
+          "type": "boolean"
+        }
+      ],
+      "pattern": {
+        "showSlotFilters": "<boolean>"
+      }
+    },
+    "com.gridee.parking.data.model.RemoteNotificationSettings": {
+      "fields": [
+        {
+          "name": "checkInReminderMinutesBefore",
+          "type": "integer"
+        },
+        {
+          "name": "checkOutReminderMinutesAfter",
+          "type": "integer"
+        },
+        {
+          "name": "maxNotificationsPerUser",
+          "type": "integer"
+        },
+        {
+          "name": "notificationProvider",
+          "type": "string"
+        },
+        {
+          "name": "sendBookingConfirmation",
+          "type": "boolean"
+        },
+        {
+          "name": "sendCancellationNotification",
+          "type": "boolean"
+        },
+        {
+          "name": "sendCheckInReminders",
+          "type": "boolean"
+        },
+        {
+          "name": "sendCheckOutReminders",
+          "type": "boolean"
+        },
+        {
+          "name": "sendPenaltyNotifications",
+          "type": "boolean"
+        }
+      ],
+      "pattern": {
+        "checkInReminderMinutesBefore": "<integer>",
+        "checkOutReminderMinutesAfter": "<integer>",
+        "maxNotificationsPerUser": "<integer>",
+        "notificationProvider": "<string>",
+        "sendBookingConfirmation": "<boolean>",
+        "sendCancellationNotification": "<boolean>",
+        "sendCheckInReminders": "<boolean>",
+        "sendCheckOutReminders": "<boolean>",
+        "sendPenaltyNotifications": "<boolean>"
+      }
+    },
+    "com.gridee.parking.data.model.RemotePlatformSettings": {
+      "fields": [
+        {
+          "name": "apiVersion",
+          "type": "string"
+        },
+        {
+          "name": "currency",
+          "type": "string"
+        },
+        {
+          "name": "currencySymbol",
+          "type": "string"
+        },
+        {
+          "name": "debugMode",
+          "type": "boolean"
+        },
+        {
+          "name": "enableCors",
+          "type": "boolean"
+        },
+        {
+          "name": "enableSwagger",
+          "type": "boolean"
+        },
+        {
+          "name": "environment",
+          "type": "string"
+        },
+        {
+          "name": "externalServiceUrls",
+          "type": "Map<string, string>"
+        },
+        {
+          "name": "rateLimitPerHour",
+          "type": "integer"
+        },
+        {
+          "name": "rateLimitPerMinute",
+          "type": "integer"
+        },
+        {
+          "name": "requestTimeoutSeconds",
+          "type": "integer"
+        },
+        {
+          "name": "timezone",
+          "type": "string"
+        }
+      ],
+      "pattern": {
+        "apiVersion": "<string>",
+        "currency": "<string>",
+        "currencySymbol": "<string>",
+        "debugMode": "<boolean>",
+        "enableCors": "<boolean>",
+        "enableSwagger": "<boolean>",
+        "environment": "<string>",
+        "externalServiceUrls": "<Map<string, string>>",
+        "rateLimitPerHour": "<integer>",
+        "rateLimitPerMinute": "<integer>",
+        "requestTimeoutSeconds": "<integer>",
+        "timezone": "<string>"
+      }
+    },
+    "com.gridee.parking.data.model.SpotAvailabilityInfo": {
+      "fields": [
+        {
+          "name": "availableCapacity",
+          "type": "integer"
+        },
+        {
+          "name": "bookedCount",
+          "type": "integer"
+        },
+        {
+          "name": "isAvailable",
+          "type": "boolean"
+        },
+        {
+          "name": "spot",
+          "type": "ParkingSpot"
+        }
+      ],
+      "pattern": {
+        "availableCapacity": "<integer>",
+        "bookedCount": "<integer>",
+        "isAvailable": "<boolean>",
+        "spot": "<ParkingSpot>"
+      }
+    },
+    "com.gridee.parking.data.model.SupportTicket": {
+      "fields": [
+        {
+          "name": "createdAt",
+          "type": "Date"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        },
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "messages",
+          "type": "List<SupportTicketMessage>"
+        },
+        {
+          "name": "parkingLotId",
+          "type": "string"
+        },
+        {
+          "name": "parkingLotName",
+          "type": "string"
+        },
+        {
+          "name": "priority",
+          "type": "string"
+        },
+        {
+          "name": "resolvedAt",
+          "type": "Date"
+        },
+        {
+          "name": "resolvedBy",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "type": "string"
+        },
+        {
+          "name": "subject",
+          "type": "string"
+        },
+        {
+          "name": "updatedAt",
+          "type": "Date"
+        },
+        {
+          "name": "userEmail",
+          "type": "string"
+        },
+        {
+          "name": "userId",
+          "type": "string"
+        },
+        {
+          "name": "userName",
+          "type": "string"
+        }
+      ],
+      "pattern": {
+        "createdAt": "<Date>",
+        "description": "<string>",
+        "id": "<string>",
+        "messages": "<List<SupportTicketMessage>>",
+        "parkingLotId": "<string>",
+        "parkingLotName": "<string>",
+        "priority": "<string>",
+        "resolvedAt": "<Date>",
+        "resolvedBy": "<string>",
+        "status": "<string>",
+        "subject": "<string>",
+        "updatedAt": "<Date>",
+        "userEmail": "<string>",
+        "userId": "<string>",
+        "userName": "<string>"
+      }
+    },
+    "com.gridee.parking.data.model.SupportTicketMessage": {
+      "fields": [
+        {
+          "name": "message",
+          "type": "string"
+        },
+        {
+          "name": "messageId",
+          "type": "string"
+        },
+        {
+          "name": "senderId",
+          "type": "string"
+        },
+        {
+          "name": "senderRole",
+          "type": "string"
+        },
+        {
+          "name": "sentAt",
+          "type": "Date"
+        }
+      ],
+      "pattern": {
+        "message": "<string>",
+        "messageId": "<string>",
+        "senderId": "<string>",
+        "senderRole": "<string>",
+        "sentAt": "<Date>"
+      }
+    },
+    "com.gridee.parking.data.model.TopUpRequest": {
+      "fields": [
+        {
+          "name": "amount",
+          "type": "number"
+        }
+      ],
+      "pattern": {
+        "amount": "<number>"
+      }
+    },
+    "com.gridee.parking.data.model.TopUpResponse": {
+      "fields": [
+        {
+          "name": "amount",
+          "type": "number"
+        },
+        {
+          "name": "balance",
+          "type": "number"
+        },
+        {
+          "name": "currency",
+          "type": "string"
+        },
+        {
+          "name": "orderId",
+          "type": "string"
+        }
+      ],
+      "pattern": {
+        "amount": "<number>",
+        "balance": "<number>",
+        "currency": "<string>",
+        "orderId": "<string>"
+      }
+    },
+    "com.gridee.parking.data.model.UpdateUserRequest": {
+      "fields": [
+        {
+          "name": "email",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "parkingLotId",
+          "type": "string"
+        },
+        {
+          "name": "parkingLotName",
+          "type": "string"
+        },
+        {
+          "name": "password",
+          "type": "string"
+        },
+        {
+          "name": "phone",
+          "type": "string"
+        },
+        {
+          "name": "vehicleNumbers",
+          "type": "List<string>"
+        }
+      ],
+      "pattern": {
+        "email": "<string>",
+        "name": "<string>",
+        "parkingLotId": "<string>",
+        "parkingLotName": "<string>",
+        "password": "<string>",
+        "phone": "<string>",
+        "vehicleNumbers": "<List<string>>"
+      }
+    },
+    "com.gridee.parking.data.model.User": {
+      "fields": [
+        {
+          "name": "defaultVehicle",
+          "type": "string"
+        },
+        {
+          "name": "email",
+          "type": "string"
+        },
+        {
+          "name": "firstUser",
+          "type": "boolean"
+        },
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "parkingLotId",
+          "type": "string"
+        },
+        {
+          "name": "parkingLotName",
+          "type": "string"
+        },
+        {
+          "name": "phone",
+          "type": "string"
+        },
+        {
+          "name": "role",
+          "type": "string"
+        },
+        {
+          "name": "vehicleNumbers",
+          "type": "List<string>"
+        },
+        {
+          "name": "walletCoins",
+          "type": "integer"
+        }
+      ],
+      "pattern": {
+        "defaultVehicle": "<string>",
+        "email": "<string>",
+        "firstUser": "<boolean>",
+        "id": "<string>",
+        "name": "<string>",
+        "parkingLotId": "<string>",
+        "parkingLotName": "<string>",
+        "phone": "<string>",
+        "role": "<string>",
+        "vehicleNumbers": "<List<string>>",
+        "walletCoins": "<integer>"
+      }
+    },
+    "com.gridee.parking.data.model.UserRegistration": {
+      "fields": [
+        {
+          "name": "email",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "parkingLotName",
+          "type": "string"
+        },
+        {
+          "name": "password",
+          "type": "string"
+        },
+        {
+          "name": "phone",
+          "type": "string"
+        },
+        {
+          "name": "vehicleNumbers",
+          "type": "List<string>"
+        }
+      ],
+      "pattern": {
+        "email": "<string>",
+        "name": "<string>",
+        "parkingLotName": "<string>",
+        "password": "<string>",
+        "phone": "<string>",
+        "vehicleNumbers": "<List<string>>"
+      }
+    },
+    "com.gridee.parking.data.model.UserResponseDto": {
+      "fields": [
+        {
+          "name": "active",
+          "type": "boolean"
+        },
+        {
+          "name": "createdAt",
+          "type": "string"
+        },
+        {
+          "name": "email",
+          "type": "string"
+        },
+        {
+          "name": "firstUser",
+          "type": "boolean"
+        },
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "parkingLotId",
+          "type": "string"
+        },
+        {
+          "name": "parkingLotName",
+          "type": "string"
+        },
+        {
+          "name": "phone",
+          "type": "string"
+        },
+        {
+          "name": "role",
+          "type": "string"
+        },
+        {
+          "name": "updatedAt",
+          "type": "string"
+        },
+        {
+          "name": "vehicleNumbers",
+          "type": "List<string>"
+        },
+        {
+          "name": "walletCoins",
+          "type": "integer"
+        }
+      ],
+      "pattern": {
+        "active": "<boolean>",
+        "createdAt": "<string>",
+        "email": "<string>",
+        "firstUser": "<boolean>",
+        "id": "<string>",
+        "name": "<string>",
+        "parkingLotId": "<string>",
+        "parkingLotName": "<string>",
+        "phone": "<string>",
+        "role": "<string>",
+        "updatedAt": "<string>",
+        "vehicleNumbers": "<List<string>>",
+        "walletCoins": "<integer>"
+      }
+    },
+    "com.gridee.parking.data.model.WalletDetails": {
+      "fields": [
+        {
+          "name": "balance",
+          "type": "number"
+        },
+        {
+          "name": "transactions",
+          "type": "List<WalletTransaction>"
+        }
+      ],
+      "pattern": {
+        "balance": "<number>",
+        "transactions": "<List<WalletTransaction>>"
+      }
+    },
+    "com.gridee.parking.data.model.WalletTransaction": {
+      "fields": [
+        {
+          "name": "amount",
+          "type": "number"
+        },
+        {
+          "name": "balanceAfter",
+          "type": "number"
+        },
+        {
+          "name": "bookingId",
+          "type": "string"
+        },
+        {
+          "name": "currency",
+          "type": "string"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        },
+        {
+          "name": "failureReason",
+          "type": "string"
+        },
+        {
+          "name": "gateway",
+          "type": "string"
+        },
+        {
+          "name": "id",
+          "type": "string"
+        },
+        {
+          "name": "lotId",
+          "type": "string"
+        },
+        {
+          "name": "lotName",
+          "type": "string"
+        },
+        {
+          "name": "method",
+          "type": "string"
+        },
+        {
+          "name": "referenceId",
+          "type": "string"
+        },
+        {
+          "name": "spotId",
+          "type": "string"
+        },
+        {
+          "name": "status",
+          "type": "string"
+        },
+        {
+          "name": "timestamp",
+          "type": "string"
+        },
+        {
+          "name": "type",
+          "type": "string"
+        }
+      ],
+      "pattern": {
+        "amount": "<number>",
+        "balanceAfter": "<number>",
+        "bookingId": "<string>",
+        "currency": "<string>",
+        "description": "<string>",
+        "failureReason": "<string>",
+        "gateway": "<string>",
+        "id": "<string>",
+        "lotId": "<string>",
+        "lotName": "<string>",
+        "method": "<string>",
+        "referenceId": "<string>",
+        "spotId": "<string>",
+        "status": "<string>",
+        "timestamp": "<string>",
+        "type": "<string>"
+      }
+    },
+    "com.gridee.parking.data.model.WalletTransactionsResponse": {
+      "fields": [
+        {
+          "name": "content",
+          "type": "List<WalletTransaction>"
+        },
+        {
+          "name": "last",
+          "type": "boolean"
+        },
+        {
+          "name": "number",
+          "type": "integer"
+        },
+        {
+          "name": "totalElements",
+          "type": "integer"
+        },
+        {
+          "name": "totalPages",
+          "type": "integer"
+        }
+      ],
+      "pattern": {
+        "content": "<List<WalletTransaction>>",
+        "last": "<boolean>",
+        "number": "<integer>",
+        "totalElements": "<integer>",
+        "totalPages": "<integer>"
+      }
+    }
+  }
+}

@@ -4,6 +4,9 @@
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <queries>
+        <package android:name="com.gridee.parking" />
+    </queries>
 
     <application android:allowBackup="false" android:label="Gridee Scheduler" android:theme="@style/AppTheme">
         <activity android:name=".MainActivity" android:exported="true">
@@ -23,6 +26,7 @@
                 <action android:name="com.yashasvi.grideescheduler.CONFIGURE" />
                 <action android:name="com.yashasvi.grideescheduler.CANCEL" />
                 <action android:name="com.yashasvi.grideescheduler.STATUS" />
+                <action android:name="com.yashasvi.grideescheduler.SIMULATE" />
             </intent-filter>
         </receiver>
         <receiver android:name=".AlarmReceiver" android:exported="false" />

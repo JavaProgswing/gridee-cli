@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import shlex
 import subprocess
 from datetime import datetime
 from pathlib import Path
@@ -22,16 +23,9 @@ def parse_datetime(value: str) -> datetime:
 
 
 def broadcast(app: Gridee, action: str, *extras: str) -> str:
-    result = app.adb(
-        "shell",
-        "am",
-        "broadcast",
-        "-a",
-        f"{ACTION_PREFIX}.{action}",
-        "-n",
-        RECEIVER,
-        *extras,
-    )
+    command = ["am", "broadcast", "-a", f"{ACTION_PREFIX}.{action}", "-n", RECEIVER, *extras]
+    remote_command = " ".join(shlex.quote(str(part)) for part in command)
+    result = app.adb("shell", remote_command)
     return "" if result is None else result.stdout.strip()
 
 
@@ -60,17 +54,24 @@ def run_scheduler(app: Gridee, args: Any) -> int:
         app.adb("shell", "am", "start", "-a", "android.settings.ACCESSIBILITY_SETTINGS")
         print("Enable 'Gridee booking scheduler' on the device.")
         return 0
+    if args.scheduler_command == "simulate":
+        print(broadcast(app, "SIMULATE"))
+        return 0
+
 
     if args.scheduler_command == "schedule":
         trigger = args.at
         if trigger <= datetime.now(trigger.tzinfo):
             raise RuntimeError("--at must be in the future.")
+        if args.daily and args.date:
+            raise RuntimeError("--date cannot be fixed when --daily is enabled.")
         extras = [
             "--el", "triggerAt", str(int(trigger.timestamp() * 1000)),
             "--es", "venue", args.venue,
             "--es", "start", args.start,
             "--es", "end", args.end,
             "--es", "date", args.date or "",
+            "--ez", "daily", str(args.daily).lower(),
             "--ez", "execute", str(args.execute).lower(),
             "--ef", "threshold", str(args.venue_threshold),
         ]

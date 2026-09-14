@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.os.Build;
 
 import java.text.DateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
@@ -38,12 +39,24 @@ final class Scheduler {
             manager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pending);
         }
         prefs(context).edit().putLong("triggerAt", triggerAt).putBoolean("armed", true)
+                .putBoolean("running", false)
                 .putString("status", "scheduled").apply();
+    }
+
+    static long nextDailyTrigger(long priorTrigger) {
+        Calendar next = Calendar.getInstance();
+        next.setTimeInMillis(priorTrigger);
+        long now = System.currentTimeMillis();
+        do {
+            next.add(Calendar.DAY_OF_YEAR, 1);
+        } while (next.getTimeInMillis() <= now);
+        return next.getTimeInMillis();
     }
 
     static void cancel(Context context) {
         ((AlarmManager) context.getSystemService(Context.ALARM_SERVICE)).cancel(operation(context));
-        prefs(context).edit().putBoolean("armed", false).putString("status", "cancelled").apply();
+        prefs(context).edit().putBoolean("armed", false).putBoolean("running", false)
+                .putBoolean("daily", false).putString("status", "cancelled").apply();
     }
 
     static String status(Context context) {
@@ -51,8 +64,9 @@ final class Scheduler {
         long trigger = p.getLong("triggerAt", 0L);
         String when = trigger == 0L ? "none" : DateFormat.getDateTimeInstance().format(new Date(trigger));
         return String.format(Locale.US,
-                "armed=%s; status=%s; trigger=%s; venue=%s; window=%s-%s; execute=%s",
-                p.getBoolean("armed", false), p.getString("status", "not configured"), when,
+                "armed=%s; running=%s; daily=%s; status=%s; trigger=%s; venue=%s; window=%s-%s; execute=%s",
+                p.getBoolean("armed", false), p.getBoolean("running", false),
+                p.getBoolean("daily", false), p.getString("status", "not configured"), when,
                 p.getString("venue", "Tech Park Avenue"), p.getString("start", "08:00"),
                 p.getString("end", "17:00"), p.getBoolean("execute", false));
     }

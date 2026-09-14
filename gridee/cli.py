@@ -9,7 +9,14 @@ import sys
 import time
 from pathlib import Path
 
-from .api import ApiError, DEFAULT_BASE_URL, default_session_file, run_api, run_auth
+from .api import (
+    ApiError,
+    DEFAULT_BASE_URL,
+    DEFAULT_FIREBASE_API_KEY,
+    default_session_file,
+    run_api,
+    run_auth,
+)
 from .booking import BookingError, parse_date, parse_hhmm, run_booking
 from .core import Config, Gridee
 from .scheduler import parse_datetime, run_scheduler
@@ -67,6 +74,16 @@ def add_api_connection_options(parser: argparse.ArgumentParser, *, allow_login: 
             help="Read one password line from stdin.",
         )
         parser.add_argument("--no-save", action="store_true", help="Do not save a successful login token.")
+        parser.add_argument(
+            "--firebase-api-key",
+            default=os.getenv("GRIDEE_FIREBASE_API_KEY", DEFAULT_FIREBASE_API_KEY),
+            help="Firebase Web API key used only for the app-compatible login fallback.",
+        )
+        parser.add_argument(
+            "--no-firebase-fallback",
+            action="store_true",
+            help="Do not retry a 401/404 login through Firebase token exchange.",
+        )
 
 
 def make_parser() -> argparse.ArgumentParser:
@@ -269,13 +286,15 @@ def make_parser() -> argparse.ArgumentParser:
     p = scheduler_sub.add_parser("install", help="Install or update the built helper APK.")
     p.add_argument("--apk", type=Path, default=Path("android-helper/build/gridee-scheduler-debug.apk"))
     scheduler_sub.add_parser("enable", help="Open Android accessibility settings.")
-    p = scheduler_sub.add_parser("schedule", help="Configure a one-shot on-device UI booking.")
+    scheduler_sub.add_parser("simulate", help="Launch a dry-run now without changing the saved alarm.")
+    p = scheduler_sub.add_parser("schedule", help="Configure an on-device UI booking.")
     p.add_argument("--at", type=parse_datetime, required=True, help="Local ISO date/time to launch automation.")
     p.add_argument("--venue", default="Tech Park Avenue")
     p.add_argument("--start", default="08:00")
     p.add_argument("--end", default="17:00")
     p.add_argument("--date", help="Booking date passed to the helper (YYYY-MM-DD).")
     p.add_argument("--venue-threshold", type=float, default=0.35)
+    p.add_argument("--daily", action="store_true", help="Repeat every day at the configured local time.")
     p.add_argument("--execute", action="store_true", help="Allow final booking confirmation.")
     scheduler_sub.add_parser("status", help="Read the helper's current schedule/status.")
     scheduler_sub.add_parser("cancel", help="Cancel the pending on-device schedule.")

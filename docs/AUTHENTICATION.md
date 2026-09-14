@@ -59,7 +59,7 @@ Those methods still use the same bearer-token value; this is not a second creden
 
 ## Legitimate token acquisition
 
-The supported way to obtain a session is to authenticate normally. The declared login/register/Google/Firebase-exchange methods return `AuthResponse`, which contains `token`, `tokenType`, user/session flags, and the user profile. The installed app saves that response internally and its interceptor attaches it automatically on later calls.
+The supported way to obtain a session is to authenticate normally. Version 1.71 first calls `POST /api/auth/login`; for an email login that returns 401 or 404, it signs in with Firebase email/password, rejects an unverified Firebase email, and sends the resulting ID token as `{"idToken":"..."}` to `POST /api/auth/firebase/exchange`. The declared login/register/Google/Firebase-exchange methods return `AuthResponse`, which contains `token`, `tokenType`, user/session flags, and the user profile.
 
 For this project's UI automation, no token handling is necessary: Gridee remains responsible for login, secure storage, expiration, and header attachment.
 
@@ -67,11 +67,13 @@ If developing an authorized API client, use an account and server environment yo
 
 ## Merged CLI authentication modes
 
-The unified CLI now supports authorized API calls in three ways:
+The unified CLI supports authorized API calls in four ways:
 
-1. `gridee auth login --email ADDRESS` performs a live login and securely prompts for the password.
-2. `--email` with `--password`, `--password-stdin`, or `GRIDEE_PASSWORD` performs an explicit credential login for that command.
+1. `gridee auth login --email ADDRESS` securely prompts for the password and mirrors the direct-login/Firebase-fallback sequence above.
+2. `--email` with `--password`, `--password-stdin`, or `GRIDEE_PASSWORD` performs the same login for one command.
 3. `--token` or `GRIDEE_TOKEN` accepts an already-authorized bearer token.
+4. `gridee_aiohttp.py` provides a small authenticated `aiohttp.ClientSession` wrapper for scripts such as the daily booking service.
 
-A successful login can save only the returned token and non-secret response metadata in the configured local session file; the password is never saved. Saved tokens are origin-bound and are not sent when `--base-url` points elsewhere. `gridee api request` exposes GET, POST, PUT, PATCH, and DELETE with JSON bodies and query/header options, so the entire documented route inventory is callable without hard-coding every endpoint.
+The Firebase client key shipped in the APK is a public client identifier and is the default; `GRIDEE_FIREBASE_API_KEY` or `--firebase-api-key` can override it. `--no-firebase-fallback` forces direct Gridee login only.
 
+A successful login saves only the returned Gridee token and non-secret response metadata in the configured local session file; the password, Firebase ID token, and Firebase refresh token are never saved. Saved tokens are origin-bound and are not sent when `--base-url` points elsewhere. `gridee api request` exposes GET, POST, PUT, PATCH, and DELETE with JSON bodies and query/header options, so the entire documented route inventory is callable without hard-coding every endpoint.

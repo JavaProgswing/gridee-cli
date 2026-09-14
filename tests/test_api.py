@@ -45,6 +45,7 @@ def test_login_then_authenticated_request(monkeypatch):
     assert login["user"]["id"] == 7
     assert user == {"id": 7}
     assert len(requests) == 2
+    assert client.last_auth_method == "direct"
 
 
 def test_refuses_cross_origin_url():
@@ -208,3 +209,101 @@ def test_wallet_command_defaults_to_current_account(monkeypatch):
         ("GET", "/api/oauth2/user", {}),
         ("GET", "/api/users/current-user/wallet", {}),
     ]
+
+
+def test_resolve_email_prompts_interactively(monkeypatch):
+    args = SimpleNamespace(email=None)
+    monkeypatch.setattr(api.sys.stdin, "isatty", lambda: True)
+    monkeypatch.setattr("builtins.input", lambda prompt: " person@example.com ")
+
+    assert api.resolve_email(args) == "person@example.com"
+
+
+def test_resolve_email_accepts_explicit_value():
+    assert api.resolve_email(SimpleNamespace(email="person@example.com")) == "person@example.com"
+
+
+def test_login_falls_back_to_firebase_exchange(monkeypatch):
+    client = ApiClient()
+    calls = []
+
+    def fake_request(method, path, **kwargs):
+        calls.append((method, path, kwargs))
+        if path == "/api/auth/login":
+            raise ApiError("HTTP 401", status_code=401)
+        return {"token": "gridee-jwt", "tokenType": "Bearer"}
+
+    monkeypatch.setattr(client, "request", fake_request)
+    monkeypatch.setattr(
+        api,
+        "firebase_password_id_token",
+        lambda email, password, **kwargs: "firebase-id-token",
+    )
+
+    client.login(" Person@Example.com ", "secret", firebase_api_key="public-key")
+
+    assert client.last_auth_method == "firebase"
+    assert client.token == "gridee-jwt"
+    assert calls == [
+        (
+            "POST",
+            "/api/auth/login",
+            {
+                "body": {"email": "person@example.com", "password": "secret"},
+                "authenticated": False,
+            },
+        ),
+        (
+            "POST",
+            "/api/auth/firebase/exchange",
+            {"body": {"idToken": "firebase-id-token"}, "authenticated": False},
+        ),
+    ]
+
+
+def test_firebase_password_flow_checks_verified_email(monkeypatch):
+    calls = []
+
+    def fake_post(url, body, *, timeout, label):
+        calls.append((url, body, timeout, label))
+        if label == "Firebase sign-in":
+            return {"idToken": "firebase-id-token"}
+        return {"users": [{"emailVerified": True}]}
+
+    monkeypatch.setattr(api, "_external_json_post", fake_post)
+    token = api.firebase_password_id_token(
+        "Person@Example.com",
+        "secret",
+        api_key="public-key",
+        timeout=12,
+    )
+
+    assert token == "firebase-id-token"
+    assert calls[0][0].endswith("accounts:signInWithPassword?key=public-key")
+    assert calls[0][1] == {
+        "email": "person@example.com",
+        "password": "secret",
+        "returnSecureToken": True,
+    }
+    assert calls[1][0].endswith("accounts:lookup?key=public-key")
+    assert calls[1][1] == {"idToken": "firebase-id-token"}
+
+
+def test_email_normalization_rejects_literal_backslash():
+    assert api.normalize_email(" Person@Example.com ") == "person@example.com"
+    with pytest.raises(ApiError, match="literal backslash"):
+        api.normalize_email(r"person\@example.com")
+
+
+def test_login_parser_supports_firebase_controls():
+    args = make_parser().parse_args(
+        [
+            "auth",
+            "login",
+            "--firebase-api-key",
+            "override-key",
+            "--no-firebase-fallback",
+        ]
+    )
+    assert args.firebase_api_key == "override-key"
+    assert args.no_firebase_fallback is True

@@ -6,6 +6,7 @@ __pycache__/
 .eggs/
 build/
 dist/
+.build/
 
 .pytest_cache/
 .mypy_cache/
@@ -14,6 +15,7 @@ dist/
 .venv/
 venv/
 env/
+.env
 
 .vscode/
 .idea/
@@ -24,6 +26,12 @@ Thumbs.db
 .playwright-cli/
 runtime/
 analysis/*.apk
+analysis/*.jobf
+analysis/*-decompiled/
+tools/jadx-*/
+tools/jadx-*.zip
 android-helper/build/
 session.json
 *.session.json
+booking_service.json
+booking_service.state.json

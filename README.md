@@ -1,6 +1,6 @@
 # Gridee CLI
 
-A unified, standard-library-only toolkit for authorized Gridee automation. It combines:
+A unified toolkit for authorized Gridee automation. It combines:
 
 - Android ADB/UIAutomator inspection and control
 - rewarded-ad Wallet automation with notification-based credit verification
@@ -18,7 +18,7 @@ Use only your own account, device, and bookings. The CLI does not bypass MFA, a 
 - a USB-debugging-authorized Android device with Gridee installed and logged in
 - for the optional scheduler APK: Android SDK platform 35, build-tools 35.0.0, a JDK, and the normal Android debug keystore
 
-The Python CLI has no third-party runtime dependencies. Tests use `pytest`.
+The core Python CLI has no third-party runtime dependencies. The optional standalone async client uses `aiohttp`; tests use `pytest`.
 
 ## Quick start
 
@@ -66,16 +66,20 @@ python .\gridee_booking.py --venue "TP Avenue" --execute
 
 ## Live API authentication
 
-The default API origin is `https://gridee.onrender.com`. Login sends JSON to `POST /api/auth/login`, reads the returned `token` and `tokenType`, and attaches `Authorization: Bearer <token>` to authenticated calls.
+The default API origin is `https://gridee.onrender.com`. Login first tries `POST /api/auth/login`. On a 401/404 it follows the Android app's fallback: Firebase email/password sign-in, verified-email lookup, then `POST /api/auth/firebase/exchange`. It saves the returned Gridee token and attaches `Authorization: Bearer <token>` to authenticated calls.
 
 ### Secure interactive login
 
 ```powershell
+# Prompts locally for both email and password, then saves the returned token.
+python .\gridee.py auth login
+
+# Or provide only the non-secret email and prompt just for the password.
 python .\gridee.py auth login --email "you@example.com"
 python .\gridee.py auth status --live
 ```
 
-The first command securely prompts for the password. The token not the password is saved under `%LOCALAPPDATA%\gridee-cli\session.json` by default. A saved token is only reused with the API origin that issued it.
+The first command securely prompts for the password. Only the final Gridee token and non-secret session metadata are saved under `%LOCALAPPDATA%\gridee-cli\session.json`; the password, Firebase ID token, and Firebase refresh token are not saved. A saved token is only reused with the API origin that issued it.
 
 ### Manually supplied credentials
 
@@ -117,6 +121,150 @@ python .\gridee.py auth logout
 ```
 
 Override the origin/session path with `GRIDEE_BASE_URL`, `GRIDEE_SESSION_FILE`, `--base-url`, or `--session-file`.
+
+## Standalone aiohttp client
+
+[`gridee_aiohttp.py`](gridee_aiohttp.py) is now a small reusable async client containing
+only app-compatible authentication, an authenticated session, and generic API requests.
+Install its optional dependency:
+
+```powershell
+python -m pip install -r .\requirements-aiohttp.txt
+```
+
+Run it directly to authenticate and fetch the current user:
+
+```powershell
+Copy-Item .\.env.example .\.env
+notepad .\.env
+python .\gridee_aiohttp.py
+```
+
+Or import the client and make multiple calls on the same session:
+
+```python
+async with GrideeClient(email, password) as client:
+    me = await client.request("GET", "/api/oauth2/user")
+    lots = await client.request("GET", "/api/parking-lots")
+```
+
+Values already present in the process environment take precedence over `.env`. If no
+password is configured, direct use prompts for it locally. Use the email without a
+backslash before `@`. The real `.env` is ignored by Git.
+
+## Daily 05:00 booking service
+
+[`gridee_booking_service.py`](gridee_booking_service.py) is a separate long-running
+worker. It submits the saved booking through
+`POST /api/bookings/{userId}/create` once per local calendar day at `05:00`.
+Create its private configuration:
+
+```powershell
+python .\gridee_booking_service.py --init
+python .\gridee_booking_service.py --setup
+```
+
+`--setup` authenticates locally and detects registered vehicles, parking lots, and
+available spots. A single result is selected automatically; multiple results are shown
+as numbered choices, and a missing result falls back to manual entry. The choices are
+saved as `spotId`, `lotId`, and `vehicleNumber`. Starting the service from an
+interactive console also launches this setup automatically when those values are missing.
+Existing partial configuration files are deep-merged with safe defaults, so missing
+booking times and retry options are restored without replacing a selected user, lot,
+spot, or vehicle.
+
+The default saved times are `{date}T08:00:00{offset}` through
+`{date}T17:00:00{offset}`. `{date}` is replaced with the scheduled local date,
+and `{offset}` with the local UTC offset (for example, `+05:30`). This matches the
+Android app/API format. `{tomorrow}` is also supported. Older saved times without an
+offset are upgraded automatically before each request.
+
+Validate the rendered request without booking:
+
+```powershell
+python .\gridee_booking_service.py --once --dry-run
+```
+
+Then configure `.env` and start the service loop:
+
+```powershell
+Copy-Item .\.env.example .\.env
+notepad .\.env
+python .\gridee_booking_service.py
+```
+
+For Pterodactyl, upload the completed `.env` through **Files**, set **APP PY FILE**
+to `gridee_booking_service.py`, and set **REQUIREMENTS FILE** to
+`requirements-aiohttp.txt`. If the egg only exposes **Additional Python Packages**,
+enter `aiohttp python-dotenv`. No custom Pterodactyl environment variables are required.
+
+The normal service command sends the booking automatically without an interactive
+confirmation. It reloads `booking_service.json` before each attempt, accepts starts
+up to `graceMinutes` after 05:00, and writes `booking_service.state.json` before
+submitting so a restart cannot submit the same day's booking twice. Both local files
+are ignored by Git. After a successful booking, the worker checks that exact booking
+every five seconds. Once the booking is actually in progress (`ACTIVE`,
+`actualCheckInTime`, or `qrCodeScanned`), monitoring stops and it will never rebook
+that booking. A cancellation by itself also does not trigger a replacement. The
+worker first requires a completed wallet refund transaction whose `bookingId`
+matches the cancelled booking, which distinguishes the automatic cancellation flow.
+It then creates a replacement immediately and monitors the replacement. Failed
+replacement requests retry every five seconds. This resumes safely after a worker
+restart.
+
+On startup after `runAt` and before `checkOutTime`, the worker queries
+`GET /api/bookings/{userId}/all` even when the local state file is missing. A
+live booking for that day is adopted and monitored without another create request,
+even if its lot, spot, or vehicle differs from the saved entry. If the API confirms
+that no current booking exists, the worker creates one, saves its ID, and starts
+monitoring it. A `409 Booking conflict` triggers another current-booking lookup and
+adoption. If the server reports a conflict but omits the existing booking ID, create
+attempts are disabled for that day instead of looping every five seconds. If the
+initial lookup itself fails, the worker does not guess or submit blindly.
+If a saved booking ID is absent from both the live and history endpoints, its status
+is `MISSING`, not `CANCELLED`. The stale ID is discarded immediately and the worker
+runs the same lookup-before-create recovery on the next five-second cycle; it does
+not enter the manual-cancellation refund timeout. State produced by the older behavior
+with `status: cancelled-no-refund` and `bookingStatus: MISSING` is migrated into this
+recovery path automatically on restart.
+
+To change accounts, keep `"userId": "current"` and replace `GRIDEE_EMAIL` and
+`GRIDEE_PASSWORD` in `.env`. State written by this version is bound to the resolved
+user ID, so a changed authenticated account discards the previous account's tracked
+booking and runs safe recovery for the new account. Delete an older
+`booking_service.state.json` once if it was created before account binding was added.
+
+To change `spotId`, `lotId`, or `vehicleNumber`, stop the worker, make sure the old
+booking is no longer active, update `booking_service.json` (or run `--setup`), remove
+`booking_service.state.json`, and restart. Invalid user IDs prevent the current-list
+check and therefore never cause a blind create. Invalid lot, spot, or vehicle values
+are rejected by the booking API and remain visible in the state/error log; correct
+the values or rerun `--setup`, which detects values available to the authenticated
+account.
+
+The retry behavior is configured in `booking_service.json`:
+
+```json
+"rebook": {
+  "enabled": true,
+  "pollSeconds": 5,
+  "retrySeconds": 5,
+  "refundWaitSeconds": 120,
+  "lateStartBufferMinutes": 5
+}
+```
+
+Monitoring continues until the booking starts or that day's configured
+`checkOutTime`. If a replacement is needed after the original `checkInTime`, its
+start is advanced to the next five-minute boundary after
+`lateStartBufferMinutes`; this avoids sending a start time in the past. A manual
+cancellation without a matching completed refund is never rebooked. After upgrading
+from the old timestamp format, a same-day `Invalid date format` failure is retried
+exactly once on startup, even after the normal grace period. A cancelled booking
+without a matching refund leaves the refund-wait loop after `refundWaitSeconds`, is
+saved as `cancelled-no-refund`, and proceeds to the normal next-day schedule. Use
+`--once` without `--dry-run` only to submit immediately; `--once` does not start the
+monitor.
 
 ## API commands
 
@@ -193,7 +341,11 @@ python .\gridee.py api request /api/auth/login --method POST --anonymous `
 
 Repeat `--query KEY=VALUE` or `--header KEY=VALUE` as needed. Supported methods are GET, POST, PUT, PATCH, and DELETE. Prefer the dedicated `auth login` command for credentials because it handles tokens without printing them.
 
-The reverse-engineered v1.71 references are retained as documentation:
+The current APK-derived endpoint inventory is:
+
+- [Gridee 1.73 generated endpoint audit](docs/ENDPOINTS_1.73.md)
+
+The earlier hand-written v1.71 references are retained for context:
 
 - [Complete API reference](docs/API_REFERENCE.md)
 - [Endpoint inventory](docs/API_ENDPOINTS_COMPLETE.md)
@@ -202,7 +354,7 @@ The reverse-engineered v1.71 references are retained as documentation:
 
 ## On-device booking scheduler
 
-The Android helper uses an exact one-shot alarm and an accessibility service to drive the normal Gridee UI. It is dry-run by default and cannot bypass a secure PIN.
+The Android helper uses an exact alarm and an accessibility service to drive the normal Gridee UI. It is dry-run by default, supports one-shot or daily schedules, and cannot bypass a secure PIN.
 
 ```powershell
 python .\gridee.py scheduler build
@@ -216,27 +368,49 @@ python .\gridee.py scheduler schedule `
   --start 08:00 `
   --end 17:00
 
+# Repeat at the same local time every day and press final confirmation.
+python .\gridee.py scheduler schedule `
+  --at 2026-08-21T05:00:00 `
+  --daily `
+  --venue "Tech Park Avenue" `
+  --start 08:00 `
+  --end 17:00 `
+  --execute
+
 python .\gridee.py scheduler status
 python .\gridee.py scheduler cancel
+
+# Launch a safe dry-run now without changing the saved alarm.
+python .\gridee.py scheduler simulate
 ```
 
-Add `--execute` to the schedule command only when the helper should press final confirmation. Source lives in `android-helper/`; the build output is `android-helper/build/gridee-scheduler-debug.apk`.
+Add `--execute` only when the helper should press final confirmation. With `--daily`, the helper re-arms for the same local time on the next day after each alarm, including across device reboots; do not combine it with a fixed `--date`. `scheduler simulate` launches the same APK flow immediately in dry-run mode, never presses final confirmation, and preserves the pending alarm. Source lives in `android-helper/`; the build output is `android-helper/build/gridee-scheduler-debug.apk`.
 
 ## APK analysis notes
 
-The installed-app APK is intentionally not committed to this merged repository. If you are authorized to inspect your local copy, place it at `analysis/gridee-1.71-base.apk` (ignored by Git) and run:
+The installed-app APK is intentionally not committed to this merged repository. If you
+are authorized to inspect your local copy, place it under `analysis/` (ignored by Git).
+Generate a versioned endpoint report with:
 
 ```powershell
-$apk = ".\analysis\gridee-1.71-base.apk"
-$apkanalyzer = "$env:LOCALAPPDATA\Android\Sdk\cmdline-tools\latest\bin\apkanalyzer.bat"
-& $apkanalyzer dex code --class "com.gridee.parking.data.auth.JwtTokenManager" $apk
+python .\tools\gridee_apk_audit.py .\analysis\gridee-1.73-base.apk `
+  --output .\docs\ENDPOINTS_1.73.md
+
+python .\tools\gridee_apk_audit.py .\analysis\gridee-1.73-base.apk `
+  --format json --output .\analysis\gridee-1.73-endpoints.json
 ```
+
+The tool reads the manifest version and extracts Retrofit method/path/query/body
+annotations from `ApiService`, merges overloads into unique HTTP endpoints, and
+decompiles referenced request/response models into JSON field patterns. The Markdown
+report is human-readable; the JSON report embeds request and response patterns directly
+on every endpoint.
 
 The captured non-secret UI hierarchy used for parser regression testing remains at `analysis/gridee-booking-home.xml`.
 
 ## Configuration
 
-ADB defaults can be supplied with `GRIDEE_DEVICE`, `GRIDEE_PACKAGE`, `GRIDEE_ACTIVITY`, `GRIDEE_ADB`, and `GRIDEE_OUTPUT`. API defaults use `GRIDEE_BASE_URL`, `GRIDEE_SESSION_FILE`, `GRIDEE_TOKEN`, `GRIDEE_TOKEN_TYPE`, `GRIDEE_EMAIL`, and `GRIDEE_PASSWORD`.
+ADB defaults can be supplied with `GRIDEE_DEVICE`, `GRIDEE_PACKAGE`, `GRIDEE_ACTIVITY`, `GRIDEE_ADB`, and `GRIDEE_OUTPUT`. API defaults use `GRIDEE_BASE_URL`, `GRIDEE_SESSION_FILE`, `GRIDEE_TOKEN`, `GRIDEE_TOKEN_TYPE`, `GRIDEE_EMAIL`, `GRIDEE_PASSWORD`, and `GRIDEE_FIREBASE_API_KEY`.
 
 Run command-specific help for the complete option list:
 

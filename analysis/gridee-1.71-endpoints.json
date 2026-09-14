@@ -1,0 +1,686 @@
+{
+  "apk": "C:\\Users\\yashasvi\\Documents\\GrideeAutomation\\analysis\\gridee-1.71-base.apk",
+  "applicationId": "com.gridee.parking",
+  "versionName": "1.71",
+  "versionCode": 72,
+  "endpointCount": 54,
+  "declarationCount": 60,
+  "endpoints": [
+    {
+      "method": "PUT",
+      "route": "/api/admin/bookings/{userId}/{bookingId}",
+      "functions": [
+        "updateBookingStatus"
+      ],
+      "query": [],
+      "hasBody": true,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/auth/firebase/exchange",
+      "functions": [
+        "exchangeFirebaseToken"
+      ],
+      "query": [],
+      "hasBody": true,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/auth/google",
+      "functions": [
+        "googleSignIn"
+      ],
+      "query": [],
+      "hasBody": true,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/auth/login",
+      "functions": [
+        "authLogin"
+      ],
+      "query": [],
+      "hasBody": true,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/auth/register",
+      "functions": [
+        "registerUser"
+      ],
+      "query": [],
+      "hasBody": true,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/bookings/{userId}/all",
+      "functions": [
+        "getUserBookings"
+      ],
+      "query": [],
+      "hasBody": false,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/bookings/{userId}/all/history",
+      "functions": [
+        "getUserBookingHistory"
+      ],
+      "query": [],
+      "hasBody": false,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/bookings/{userId}/checkin/{bookingId}",
+      "functions": [
+        "checkInBooking"
+      ],
+      "query": [],
+      "hasBody": true,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/bookings/{userId}/checkout/{bookingId}",
+      "functions": [
+        "checkOutBooking"
+      ],
+      "query": [],
+      "hasBody": true,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/bookings/{userId}/create",
+      "functions": [
+        "createBooking"
+      ],
+      "query": [],
+      "hasBody": true,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/bookings/{userId}/{bookingId}",
+      "functions": [
+        "getBookingById"
+      ],
+      "query": [],
+      "hasBody": false,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/bookings/{userId}/{bookingId}/cancel",
+      "functions": [
+        "cancelBooking"
+      ],
+      "query": [],
+      "hasBody": false,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "PUT",
+      "route": "/api/bookings/{userId}/{bookingId}/extend",
+      "functions": [
+        "extendBooking"
+      ],
+      "query": [],
+      "hasBody": true,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/bookings/{userId}/{bookingId}/penalty",
+      "functions": [
+        "getPenaltyInfo"
+      ],
+      "query": [],
+      "hasBody": false,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/bookings/{userId}/{bookingId}/priceBreakup",
+      "functions": [
+        "getBookingPriceBreakup"
+      ],
+      "query": [],
+      "hasBody": false,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/config/all",
+      "functions": [
+        "getAppConfig"
+      ],
+      "query": [],
+      "hasBody": false,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/custom-ads/active",
+      "functions": [
+        "getActiveCustomAds"
+      ],
+      "query": [
+        "placement",
+        "platform",
+        "parkingLotId"
+      ],
+      "hasBody": false,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/custom-ads/{adId}/click",
+      "functions": [
+        "trackCustomAdClick"
+      ],
+      "query": [],
+      "hasBody": false,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/custom-ads/{adId}/impression",
+      "functions": [
+        "trackCustomAdImpression"
+      ],
+      "query": [],
+      "hasBody": false,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "DELETE",
+      "route": "/api/notifications/tokens",
+      "functions": [
+        "unregisterNotificationToken"
+      ],
+      "query": [],
+      "hasBody": true,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/notifications/tokens",
+      "functions": [
+        "registerNotificationToken"
+      ],
+      "query": [],
+      "hasBody": true,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/oauth2/user",
+      "functions": [
+        "getOAuth2User"
+      ],
+      "query": [],
+      "hasBody": false,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/operator/bookings/checkin",
+      "functions": [
+        "operatorCheckIn"
+      ],
+      "query": [],
+      "hasBody": true,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/operator/bookings/checkout",
+      "functions": [
+        "operatorCheckOut"
+      ],
+      "query": [],
+      "hasBody": true,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/operator/parking-lots/{lotId}/spots",
+      "functions": [
+        "getOperatorParkingSpotsForLotPayload"
+      ],
+      "query": [],
+      "hasBody": false,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/operator/parking-lots/{parkingLotId}/bookings/checkin",
+      "functions": [
+        "operatorCheckInForLot"
+      ],
+      "query": [],
+      "hasBody": true,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/operator/parking-lots/{parkingLotId}/bookings/checkout",
+      "functions": [
+        "operatorCheckOutForLot"
+      ],
+      "query": [],
+      "hasBody": true,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/operator/parking-spots",
+      "functions": [
+        "getOperatorParkingSpots",
+        "getOperatorParkingSpotsPayload"
+      ],
+      "query": [],
+      "hasBody": false,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/parking-lots",
+      "functions": [
+        "getParkingLots",
+        "getParkingLotsByType",
+        "getParkingLotsPayload"
+      ],
+      "query": [
+        "organizationType"
+      ],
+      "hasBody": false,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/parking-lots/list/by-names",
+      "functions": [
+        "getParkingLotNames"
+      ],
+      "query": [],
+      "hasBody": false,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/parking-lots/search/by-name",
+      "functions": [
+        "getParkingLotByName"
+      ],
+      "query": [
+        "name"
+      ],
+      "hasBody": false,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/parking-lots/{lotId}/booking-policy",
+      "functions": [
+        "getLotBookingPolicy"
+      ],
+      "query": [],
+      "hasBody": false,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/parking-lots/{lotId}/bookings/{userId}/all",
+      "functions": [
+        "getUserBookingsForLot"
+      ],
+      "query": [],
+      "hasBody": false,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/parking-lots/{lotId}/bookings/{userId}/create",
+      "functions": [
+        "createBookingForLot"
+      ],
+      "query": [],
+      "hasBody": true,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/parking-lots/{lotId}/bookings/{userId}/history",
+      "functions": [
+        "getUserBookingHistoryForLot"
+      ],
+      "query": [],
+      "hasBody": false,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/parking-lots/{lotId}/bookings/{userId}/{bookingId}",
+      "functions": [
+        "getBookingByIdForLot"
+      ],
+      "query": [],
+      "hasBody": false,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/parking-lots/{lotId}/spots",
+      "functions": [
+        "getParkingSpotsForLot",
+        "getParkingSpotsForLotPayload"
+      ],
+      "query": [],
+      "hasBody": false,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/parking-lots/{lotId}/spots/available",
+      "functions": [
+        "getAvailableSpotsForLot"
+      ],
+      "query": [
+        "startTime",
+        "endTime"
+      ],
+      "hasBody": false,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/parking-lots/{lotId}/spots/{spotId}/available",
+      "functions": [
+        "isParkingSpotAvailableForLot"
+      ],
+      "query": [
+        "startTime",
+        "endTime"
+      ],
+      "hasBody": false,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/parking-spots",
+      "functions": [
+        "getParkingSpots",
+        "getParkingSpotsPayload"
+      ],
+      "query": [],
+      "hasBody": false,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/parking-spots/available",
+      "functions": [
+        "getAvailableSpots"
+      ],
+      "query": [
+        "lotId",
+        "startTime",
+        "endTime"
+      ],
+      "hasBody": false,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/parking-spots/id/{id}",
+      "functions": [
+        "getParkingSpotById"
+      ],
+      "query": [],
+      "hasBody": false,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/parking-spots/lot/{lotId}",
+      "functions": [
+        "getParkingSpotsByLot",
+        "getParkingSpotsByLotPayload"
+      ],
+      "query": [],
+      "hasBody": false,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/payments/initiate",
+      "functions": [
+        "initiatePayment"
+      ],
+      "query": [],
+      "hasBody": true,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/payments/status/{orderId}",
+      "functions": [
+        "getPaymentStatus"
+      ],
+      "query": [],
+      "hasBody": false,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/support/tickets",
+      "functions": [
+        "createSupportTicket"
+      ],
+      "query": [],
+      "hasBody": true,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/support/tickets/my",
+      "functions": [
+        "getMySupportTickets"
+      ],
+      "query": [],
+      "hasBody": false,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/support/tickets/{ticketId}",
+      "functions": [
+        "getSupportTicket"
+      ],
+      "query": [],
+      "hasBody": false,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/support/tickets/{ticketId}/messages",
+      "functions": [
+        "addSupportTicketMessage"
+      ],
+      "query": [],
+      "hasBody": true,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/users/{id}",
+      "functions": [
+        "getUserById"
+      ],
+      "query": [],
+      "hasBody": false,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "PUT",
+      "route": "/api/users/{id}",
+      "functions": [
+        "updateUser"
+      ],
+      "query": [],
+      "hasBody": true,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/users/{userId}/wallet",
+      "functions": [
+        "getWalletDetails"
+      ],
+      "query": [],
+      "hasBody": false,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "POST",
+      "route": "/api/users/{userId}/wallet/topup",
+      "functions": [
+        "topUpWallet"
+      ],
+      "query": [],
+      "hasBody": true,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    },
+    {
+      "method": "GET",
+      "route": "/api/users/{userId}/wallet/transactions",
+      "functions": [
+        "getWalletTransactions"
+      ],
+      "query": [
+        "page",
+        "size",
+        "sort"
+      ],
+      "hasBody": false,
+      "sourceClasses": [
+        "com.gridee.parking.data.api.ApiService"
+      ]
+    }
+  ]
+}

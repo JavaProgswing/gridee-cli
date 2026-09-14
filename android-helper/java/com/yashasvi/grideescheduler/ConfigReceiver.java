@@ -17,6 +17,16 @@ public final class ConfigReceiver extends BroadcastReceiver {
             setResultData(Scheduler.status(context));
             return;
         }
+        if ("com.yashasvi.grideescheduler.SIMULATE".equals(action)) {
+            Scheduler.prefs(context).edit().putBoolean("running", true)
+                    .putBoolean("runExecute", false).putString("stage", "home")
+                    .putString("status", "simulation running; final confirmation disabled").apply();
+            context.startActivity(new Intent(context, TriggerActivity.class)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP));
+            setResultData(Scheduler.status(context));
+            return;
+        }
+
         if (!"com.yashasvi.grideescheduler.CONFIGURE".equals(action)) return;
         long trigger = intent.getLongExtra("triggerAt", 0L);
         if (trigger <= 0L) {
@@ -29,6 +39,7 @@ public final class ConfigReceiver extends BroadcastReceiver {
         e.putString("start", value(intent, "start", "08:00"));
         e.putString("end", value(intent, "end", "17:00"));
         e.putString("date", value(intent, "date", ""));
+        e.putBoolean("daily", intent.getBooleanExtra("daily", false));
         e.putBoolean("execute", intent.getBooleanExtra("execute", false));
         e.putFloat("threshold", intent.getFloatExtra("threshold", 0.35f));
         e.putLong("configuredAt", System.currentTimeMillis());

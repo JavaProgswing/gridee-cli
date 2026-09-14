@@ -20,7 +20,7 @@ public final class MainActivity extends Activity {
         TextView title = new TextView(this);
         title.setText("Gridee Scheduler"); title.setTextSize(26f); box.addView(title, row());
         TextView note = new TextView(this);
-        note.setText("One-shot Android alarm using the normal Gridee UI. Enable accessibility once. A secure PIN cannot be bypassed.");
+        note.setText("One-shot or daily Android alarm using the normal Gridee UI. Enable accessibility once. A secure PIN cannot be bypassed.");
         note.setTextSize(16f); note.setPadding(0, 32, 0, 32); box.addView(note, row());
         status = new TextView(this); status.setTextSize(15f); box.addView(status, row());
         Button settings = new Button(this); settings.setText("Enable accessibility service");

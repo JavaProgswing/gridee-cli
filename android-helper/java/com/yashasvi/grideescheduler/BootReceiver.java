@@ -12,6 +12,8 @@ public final class BootReceiver extends BroadcastReceiver {
         long trigger = p.getLong("triggerAt", 0L);
         if (trigger > System.currentTimeMillis()) {
             Scheduler.schedule(context, trigger);
+        } else if (p.getBoolean("daily", false) && trigger > 0L) {
+            Scheduler.schedule(context, Scheduler.nextDailyTrigger(trigger));
         } else {
             p.edit().putBoolean("armed", false).putString("status", "missed while powered off").apply();
         }

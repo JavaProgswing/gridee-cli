@@ -14,10 +14,17 @@ from urllib.request import Request, urlopen
 
 
 DEFAULT_BASE_URL = "https://gridee.onrender.com"
+DEFAULT_FIREBASE_API_KEY = "AIzaSyDN63teqDI3fvPQRY2NUyGbmiCklbLgkls"
+FIREBASE_AUTH_BASE_URL = "https://identitytoolkit.googleapis.com/v1/accounts:"
+FIREBASE_FALLBACK_STATUS_CODES = {401, 404}
 
 
 class ApiError(RuntimeError):
     """A readable error returned by the Gridee HTTP API or transport."""
+
+    def __init__(self, message: str, *, status_code: int | None = None) -> None:
+        super().__init__(message)
+        self.status_code = status_code
 
 
 def default_session_file() -> Path:
@@ -75,6 +82,7 @@ class ApiClient:
         self.token_type = token_type or "Bearer"
         self.timeout = timeout
         self.last_login_response: dict[str, Any] = {}
+        self.last_auth_method: str | None = None
 
     def request(
         self,
@@ -125,18 +133,44 @@ class ApiClient:
                 detail = message.get("message") or message.get("error") or json.dumps(message)
             else:
                 detail = str(message).strip() or exc.reason
-            raise ApiError(f"HTTP {exc.code}: {detail}") from exc
+            raise ApiError(f"HTTP {exc.code}: {detail}", status_code=exc.code) from exc
         except URLError as exc:
             raise ApiError(f"Could not reach {url}: {exc.reason}") from exc
         return _decode_response(raw, content_type)
 
-    def login(self, email: str, password: str) -> dict[str, Any]:
-        response = self.request(
-            "POST",
-            "/api/auth/login",
-            body={"email": email, "password": password},
-            authenticated=False,
-        )
+    def login(
+        self,
+        email: str,
+        password: str,
+        *,
+        firebase_api_key: str = DEFAULT_FIREBASE_API_KEY,
+        firebase_fallback: bool = True,
+    ) -> dict[str, Any]:
+        email = normalize_email(email)
+        try:
+            response = self.request(
+                "POST",
+                "/api/auth/login",
+                body={"email": email, "password": password},
+                authenticated=False,
+            )
+            auth_method = "direct"
+        except ApiError as exc:
+            if not firebase_fallback or exc.status_code not in FIREBASE_FALLBACK_STATUS_CODES:
+                raise
+            id_token = firebase_password_id_token(
+                email,
+                password,
+                api_key=firebase_api_key,
+                timeout=self.timeout,
+            )
+            response = self.request(
+                "POST",
+                "/api/auth/firebase/exchange",
+                body={"idToken": id_token},
+                authenticated=False,
+            )
+            auth_method = "firebase"
         if not isinstance(response, dict):
             raise ApiError("Login returned an unexpected non-object response.")
         token = response.get("token") or response.get("accessToken")
@@ -147,7 +181,83 @@ class ApiClient:
         self.token = token
         self.token_type = str(response.get("tokenType") or "Bearer")
         self.last_login_response = response
+        self.last_auth_method = auth_method
         return response
+
+
+def _external_json_post(
+    url: str,
+    body: dict[str, Any],
+    *,
+    timeout: float,
+    label: str,
+) -> dict[str, Any]:
+    payload = json.dumps(body).encode("utf-8")
+    request = Request(
+        url,
+        data=payload,
+        headers={"Accept": "application/json", "Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urlopen(request, timeout=timeout) as response:
+            result = _decode_response(response.read(), response.headers.get("Content-Type", ""))
+    except HTTPError as exc:
+        result = _decode_response(exc.read(), exc.headers.get("Content-Type", ""))
+        detail: Any = result
+        if isinstance(result, dict):
+            error = result.get("error")
+            if isinstance(error, dict):
+                detail = error.get("message") or error.get("status") or error
+            else:
+                detail = error or result.get("message") or result
+        if isinstance(detail, (dict, list)):
+            detail = json.dumps(detail)
+        raise ApiError(
+            f"{label} failed: {str(detail).strip() or exc.reason}",
+            status_code=exc.code,
+        ) from exc
+    except URLError as exc:
+        raise ApiError(f"Could not reach {label}: {exc.reason}") from exc
+    if not isinstance(result, dict):
+        raise ApiError(f"{label} returned an unexpected non-object response.")
+    return result
+
+
+def firebase_password_id_token(
+    email: str,
+    password: str,
+    *,
+    api_key: str,
+    timeout: float,
+) -> str:
+    key = api_key.strip()
+    if not key:
+        raise ApiError(
+            "Firebase fallback needs an API key; set GRIDEE_FIREBASE_API_KEY "
+            "or pass --firebase-api-key."
+        )
+    suffix = "?" + urlencode({"key": key})
+    sign_in = _external_json_post(
+        FIREBASE_AUTH_BASE_URL + "signInWithPassword" + suffix,
+        {"email": normalize_email(email), "password": password, "returnSecureToken": True},
+        timeout=timeout,
+        label="Firebase sign-in",
+    )
+    id_token = sign_in.get("idToken")
+    if not isinstance(id_token, str) or not id_token:
+        raise ApiError("Firebase sign-in response did not contain an ID token.")
+    lookup = _external_json_post(
+        FIREBASE_AUTH_BASE_URL + "lookup" + suffix,
+        {"idToken": id_token},
+        timeout=timeout,
+        label="Firebase account lookup",
+    )
+    users = lookup.get("users")
+    user = users[0] if isinstance(users, list) and users else None
+    if not isinstance(user, dict) or user.get("emailVerified") is not True:
+        raise ApiError("Firebase email is not verified; verify it in the official app first.")
+    return id_token
 
 
 def _decode_response(raw: bytes, content_type: str) -> Any:
@@ -172,6 +282,26 @@ def parse_pairs(values: Iterable[str], label: str) -> list[tuple[str, str]]:
             raise ApiError(f"{label} key cannot be empty.")
         pairs.append((key, item))
     return pairs
+
+
+def normalize_email(value: str) -> str:
+    email = value.strip()
+    if "\\@" in email:
+        raise ApiError(
+            r"Email contains a literal backslash before @; use name@example.com, not name\@example.com."
+        )
+    return email.lower() if "@" in email else email
+
+
+def resolve_email(args: Any) -> str:
+    value = str(getattr(args, "email", None) or "").strip()
+    if value:
+        return normalize_email(value)
+    if sys.stdin.isatty():
+        value = input("Gridee email: ").strip()
+    if not value:
+        raise ApiError("An email is required; use the interactive prompt, --email, or GRIDEE_EMAIL.")
+    return normalize_email(value)
 
 
 def resolve_password(args: Any, *, required: bool) -> str | None:
@@ -204,13 +334,20 @@ def authenticated_client(args: Any, *, allow_login: bool = True) -> tuple[ApiCli
 
     email = getattr(args, "email", None)
     if allow_login and email:
-        response = client.login(email, resolve_password(args, required=True) or "")
+        email = normalize_email(str(email))
+        response = client.login(
+            email,
+            resolve_password(args, required=True) or "",
+            firebase_api_key=getattr(args, "firebase_api_key", DEFAULT_FIREBASE_API_KEY),
+            firebase_fallback=not getattr(args, "no_firebase_fallback", False),
+        )
         if not getattr(args, "no_save", False):
             store.save(
                 {
                     "baseUrl": client.base_url.rstrip("/"),
                     "token": client.token,
                     "tokenType": client.token_type,
+                    "authMethod": client.last_auth_method,
                     "email": email,
                     "user": response.get("user"),
                     "mfaRequired": response.get("mfaRequired"),
@@ -247,13 +384,13 @@ def run_auth(args: Any) -> int:
         return 0
 
     if args.auth_command == "login":
-        if not args.email:
-            raise ApiError("Email is required; pass --email or set GRIDEE_EMAIL.")
+        args.email = resolve_email(args)
         client, store = authenticated_client(args)
         session = store.load() if not args.no_save else client.last_login_response
         result = {
             "authenticated": bool(client.token),
             "tokenType": client.token_type,
+            "authMethod": client.last_auth_method or session.get("authMethod"),
             "saved": not args.no_save,
             "sessionFile": str(store.path) if not args.no_save else None,
             "user": session.get("user"),
@@ -271,6 +408,7 @@ def run_auth(args: Any) -> int:
         "authenticated": bool(client.token),
         "baseUrl": client.base_url.rstrip("/"),
         "tokenType": client.token_type if client.token else None,
+        "authMethod": session.get("authMethod"),
         "sessionFile": str(store.path),
         "savedEmail": session.get("email"),
     }

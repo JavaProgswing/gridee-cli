@@ -24,7 +24,7 @@ public final class BookingAccessibilityService extends AccessibilityService {
     private final Runnable driveAgain = new Runnable() {
         @Override public void run() {
             drive();
-            if (isArmed() && System.currentTimeMillis() < driveUntil) handler.postDelayed(this, 900L);
+            if (isRunning() && System.currentTimeMillis() < driveUntil) handler.postDelayed(this, 900L);
         }
     };
 
@@ -35,7 +35,7 @@ public final class BookingAccessibilityService extends AccessibilityService {
     }
 
     @Override public void onAccessibilityEvent(AccessibilityEvent event) {
-        if (!isArmed()) return;
+        if (!isRunning()) return;
         if (driveUntil == 0L) driveUntil = System.currentTimeMillis() + 180000L;
         handler.removeCallbacks(driveAgain);
         handler.postDelayed(driveAgain, 250L);
@@ -43,10 +43,10 @@ public final class BookingAccessibilityService extends AccessibilityService {
 
     @Override public void onInterrupt() {}
 
-    private boolean isArmed() { return Scheduler.prefs(this).getBoolean("armed", false); }
+    private boolean isRunning() { return Scheduler.prefs(this).getBoolean("running", false); }
 
     private void drive() {
-        if (!isArmed() || System.currentTimeMillis() - lastActionAt < 650L) return;
+        if (!isRunning() || System.currentTimeMillis() - lastActionAt < 650L) return;
         AccessibilityNodeInfo root = getRootInActiveWindow();
         if (root == null || !Scheduler.GRIdEE_PACKAGE.contentEquals(root.getPackageName())) return;
 
@@ -93,7 +93,7 @@ public final class BookingAccessibilityService extends AccessibilityService {
             AccessibilityNodeInfo confirm = byId(root, "btnConfirmContainer", "btnConfirm", "confirm_button");
             if (confirm == null) confirm = byText(root, "confirm booking|book now|reserve");
             if (confirm != null) {
-                if (!prefs.getBoolean("execute", false)) {
+                if (!prefs.getBoolean("runExecute", prefs.getBoolean("execute", false))) {
                     finish("dry run ready; confirmation not pressed");
                 } else if (click(confirm)) {
                     prefs.edit().putString("stage", "submitted").putString("status", "submitted; awaiting result").apply();
@@ -154,8 +154,18 @@ public final class BookingAccessibilityService extends AccessibilityService {
     }
 
     private void finish(String status) {
-        Scheduler.prefs(this).edit().putBoolean("armed", false).putString("stage", "done")
-                .putString("status", status).putLong("completedAt", System.currentTimeMillis()).apply();
+        SharedPreferences prefs = Scheduler.prefs(this);
+        boolean daily = prefs.getBoolean("daily", false);
+        SharedPreferences.Editor editor = prefs.edit().putBoolean("running", false)
+                .putString("stage", "done").putLong("completedAt", System.currentTimeMillis());
+        if (daily) {
+            editor.putString("status", status + "; next daily run remains armed");
+        } else {
+            editor.putBoolean("armed", false).putString("status", status);
+        }
+        editor.remove("runExecute");
+        editor.apply();
+        driveUntil = 0L;
         handler.removeCallbacks(driveAgain);
     }
 
