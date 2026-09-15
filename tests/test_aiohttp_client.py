@@ -451,6 +451,174 @@ def test_cancelled_booking_is_rebooked_and_replacement_is_monitored(
     assert ("POST", "/api/bookings/user-1/create") in calls
 
 
+def test_rebook_409_adopts_existing_booking(monkeypatch, tmp_path):
+    tz = timezone(timedelta(hours=5, minutes=30))
+
+    class Clock(datetime):
+        current = datetime(2026, 9, 14, 10, 0, tzinfo=tz)
+
+        @classmethod
+        def now(cls, tz=None):
+            return cls.current
+
+    calls = []
+
+    class Client:
+        user = {}
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *_):
+            pass
+
+        async def request(self, method, path, **kwargs):
+            calls.append((method, path))
+            if path.endswith("/wallet/transactions"):
+                return {
+                    "content": [
+                        {
+                            "id": "refund-1",
+                            "bookingId": "cancelled-1",
+                            "type": "REFUND",
+                            "status": "COMPLETED",
+                        }
+                    ]
+                }
+            if path.endswith("/wallet"):
+                return {"balance": 100}
+            if method == "POST":
+                raise ApiError("Booking conflict", 409)
+            if path.endswith("/all"):
+                return {
+                    "items": [
+                        {
+                            "id": "existing-replacement",
+                            "lotId": "lot-1",
+                            "spotId": "spot-1",
+                            "vehicleNumber": "KA01AA0001",
+                            "checkInTime": "2026-09-14T10:05:00+05:30",
+                            "checkOutTime": "2026-09-14T17:00:00+05:30",
+                            "status": "PENDING",
+                        }
+                    ]
+                }
+            if path.endswith("/cancelled-1"):
+                return {"id": "cancelled-1", "status": "CANCELLED"}
+            if path.endswith("/existing-replacement"):
+                return {"id": "existing-replacement", "status": "ACTIVE"}
+            raise AssertionError((method, path))
+
+    config = {
+        "userId": "user-1",
+        "rebook": {"enabled": True, "pollSeconds": 5, "retrySeconds": 5},
+        "booking": {
+            "spotId": "spot-1",
+            "lotId": "lot-1",
+            "checkInTime": "{date}T08:00:00+05:30",
+            "checkOutTime": "{date}T17:00:00+05:30",
+            "vehicleNumber": "KA01AA0001",
+        },
+    }
+    state = {
+        "lastAttemptDate": "2026-09-14",
+        "bookingId": "cancelled-1",
+        "status": "submitted",
+    }
+    monkeypatch.setattr(service, "datetime", Clock)
+    monkeypatch.setattr(service, "GrideeClient", lambda *args, **kwargs: Client())
+    monkeypatch.setenv("GRIDEE_EMAIL", "person@example.com")
+    monkeypatch.setenv("GRIDEE_PASSWORD", "secret")
+
+    result = asyncio.run(
+        service.monitor_and_rebook(
+            config, date(2026, 9, 14), tmp_path / "state.json", state
+        )
+    )
+
+    assert result["status"] == "booking-started"
+    assert result["bookingId"] == "existing-replacement"
+    assert result["rebookAttempts"] == 1
+    assert sum(method == "POST" for method, _ in calls) == 1
+    assert ("GET", "/api/bookings/user-1/all") in calls
+
+
+def test_rebook_stops_once_rounded_start_reaches_checkout(monkeypatch, tmp_path):
+    tz = timezone(timedelta(hours=5, minutes=30))
+
+    class Clock(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return datetime(2026, 9, 14, 16, 55, tzinfo=tz)
+
+    calls = []
+
+    class Client:
+        user = {}
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *_):
+            pass
+
+        async def request(self, method, path, **kwargs):
+            calls.append((method, path))
+            if path.endswith("/wallet/transactions"):
+                return {
+                    "content": [
+                        {
+                            "id": "refund-1",
+                            "bookingId": "cancelled-1",
+                            "type": "REFUND",
+                            "status": "COMPLETED",
+                        }
+                    ]
+                }
+            if path.endswith("/cancelled-1"):
+                return {"id": "cancelled-1", "status": "CANCELLED"}
+            raise AssertionError((method, path))
+
+    config = {
+        "userId": "user-1",
+        "rebook": {
+            "enabled": True,
+            "pollSeconds": 5,
+            "retrySeconds": 5,
+            "lateStartBufferMinutes": 5,
+        },
+        "booking": {
+            "spotId": "spot-1",
+            "lotId": "lot-1",
+            "checkInTime": "{date}T08:00:00+05:30",
+            "checkOutTime": "{date}T17:00:00+05:30",
+            "vehicleNumber": "KA01AA0001",
+        },
+    }
+    state = {
+        "lastAttemptDate": "2026-09-14",
+        "bookingId": "cancelled-1",
+        "status": "submitted",
+    }
+    monkeypatch.setattr(service, "datetime", Clock)
+    monkeypatch.setattr(service, "GrideeClient", lambda *args, **kwargs: Client())
+    monkeypatch.setenv("GRIDEE_EMAIL", "person@example.com")
+    monkeypatch.setenv("GRIDEE_PASSWORD", "secret")
+
+    result = asyncio.run(
+        service.monitor_and_rebook(
+            config, date(2026, 9, 14), tmp_path / "state.json", state
+        )
+    )
+
+    assert result["status"] == "monitor-complete"
+    assert result["rebookStoppedReason"] == (
+        "Too late to create a replacement before check-out time."
+    )
+    assert "rebookAttempts" not in result
+    assert not any(method == "POST" for method, _ in calls)
+
+
 def test_cancelled_booking_without_refund_is_not_rebooked(monkeypatch, tmp_path):
     tz = timezone(timedelta(hours=5, minutes=30))
 
@@ -705,6 +873,18 @@ def test_restart_409_refetches_and_adopts_minimal_current_booking(monkeypatch, t
     calls = []
     all_reads = 0
 
+    class Clock(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return datetime(
+                2026,
+                9,
+                14,
+                10,
+                30,
+                tzinfo=timezone(timedelta(hours=5, minutes=30)),
+            )
+
     class Client:
         user = {}
 
@@ -742,6 +922,7 @@ def test_restart_409_refetches_and_adopts_minimal_current_booking(monkeypatch, t
             "vehicleNumber": "KA01AA0001",
         },
     }
+    monkeypatch.setattr(service, "datetime", Clock)
     monkeypatch.setattr(service, "GrideeClient", lambda *args, **kwargs: Client())
     monkeypatch.setenv("GRIDEE_EMAIL", "person@example.com")
     monkeypatch.setenv("GRIDEE_PASSWORD", "secret")

@@ -73,6 +73,10 @@ class ServiceError(RuntimeError):
     pass
 
 
+class RebookWindowClosed(ServiceError):
+    pass
+
+
 def read_json(path: Path, default: dict[str, Any] | None = None) -> dict[str, Any]:
     try:
         value = json.loads(path.read_text(encoding="utf-8"))
@@ -465,7 +469,9 @@ def replacement_booking_body(
     if remainder:
         candidate += timedelta(minutes=5 - remainder)
     if candidate >= ends_at:
-        raise ServiceError("Too late to create a replacement before check-out time.")
+        raise RebookWindowClosed(
+            "Too late to create a replacement before check-out time."
+        )
     body["checkInTime"] = candidate.isoformat(timespec="seconds")
     return body
 
@@ -1011,18 +1017,86 @@ async def monitor_and_rebook(
             )
 
             while datetime.now().astimezone() < deadline:
-                state["rebookAttempts"] = int(state.get("rebookAttempts", 0)) + 1
-                state["rebookAttemptedAt"] = datetime.now().astimezone().isoformat()
                 try:
                     replacement_body = replacement_booking_body(
                         config, booking_date, datetime.now().astimezone()
                     )
+                except RebookWindowClosed as exc:
+                    state.update(
+                        {
+                            "status": "monitor-complete",
+                            "monitorCompletedAt": datetime.now().astimezone().isoformat(),
+                            "rebookStoppedReason": str(exc),
+                        }
+                    )
+                    state.pop("error", None)
+                    write_json(state_path, state)
+                    print(
+                        f"Replacement window closed for {booking_date}; "
+                        "automatic rebooking stopped for today.",
+                        flush=True,
+                    )
+                    return state
+
+                state["rebookAttempts"] = int(state.get("rebookAttempts", 0)) + 1
+                state["rebookAttemptedAt"] = datetime.now().astimezone().isoformat()
+                try:
                     _, result = await submit_with_client(
                         client,
                         config,
                         booking_date,
                         user_id,
                         body=replacement_body,
+                    )
+                except ApiError as exc:
+                    if exc.status != 409:
+                        state.update({"status": "rebook-failed", "error": str(exc)})
+                        write_json(state_path, state)
+                        print(f"[!] Rebook attempt failed: {exc}", flush=True)
+                        await asyncio.sleep(retry_seconds)
+                        continue
+
+                    # A conflict often means the create succeeded but its response
+                    # was lost, or another client created the booking first. Re-read
+                    # the current collection and adopt that booking before retrying.
+                    try:
+                        current = await client.request(
+                            "GET", f"/api/bookings/{quote(user_id, safe='')}/all"
+                        )
+                    except Exception as refresh_exc:
+                        state.update(
+                            {
+                                "status": "rebook-failed",
+                                "error": (
+                                    f"{exc}; current-booking refresh failed: "
+                                    f"{refresh_exc}"
+                                ),
+                            }
+                        )
+                        write_json(state_path, state)
+                        print(f"[!] Rebook attempt failed: {state['error']}", flush=True)
+                        await asyncio.sleep(retry_seconds)
+                        continue
+
+                    existing = select_current_booking(
+                        current, booking_body(config, booking_date), booking_date
+                    )
+                    if existing is None:
+                        state.update({"status": "rebook-failed", "error": str(exc)})
+                        write_json(state_path, state)
+                        print(
+                            "[!] Booking conflict reported, but the current booking "
+                            f"is not visible yet; checking again in {retry_seconds}s.",
+                            flush=True,
+                        )
+                        await asyncio.sleep(retry_seconds)
+                        continue
+
+                    result = existing
+                    print(
+                        "Booking conflict resolved by adopting the existing "
+                        "same-day booking.",
+                        flush=True,
                     )
                 except Exception as exc:
                     state.update({"status": "rebook-failed", "error": str(exc)})
