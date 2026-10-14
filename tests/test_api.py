@@ -36,6 +36,8 @@ def test_login_then_authenticated_request(monkeypatch):
             assert json.loads(request.data) == {"email": "person@example.com", "password": "secret"}
             return FakeResponse({"token": "jwt-value", "tokenType": "Bearer", "user": {"id": 7}})
         assert request.get_header("Authorization") == "Bearer jwt-value"
+        assert request.get_header("User-agent") == "okhttp/4.12.0"
+        assert request.get_header("X-app-version") == "android/1.75 (83)"
         return FakeResponse({"id": 7})
 
     monkeypatch.setattr(api, "urlopen", fake_urlopen)
@@ -46,6 +48,26 @@ def test_login_then_authenticated_request(monkeypatch):
     assert user == {"id": 7}
     assert len(requests) == 2
     assert client.last_auth_method == "direct"
+
+
+def test_api_client_transport_headers_can_be_overridden(monkeypatch):
+    captured = []
+
+    def fake_urlopen(request, timeout):
+        captured.append(request)
+        return FakeResponse({"ok": True})
+
+    monkeypatch.setattr(api, "urlopen", fake_urlopen)
+    client = ApiClient(
+        token="jwt-value",
+        app_version="android/1.76 (84)",
+        user_agent="custom-agent",
+        device_id="device-123",
+    )
+    client.request("GET", "/api/bookings/user-1/all")
+    assert captured[0].get_header("User-agent") == "custom-agent"
+    assert captured[0].get_header("X-app-version") == "android/1.76 (84)"
+    assert captured[0].get_header("X-device-id") == "device-123"
 
 
 def test_refuses_cross_origin_url():

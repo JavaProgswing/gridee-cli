@@ -27,7 +27,7 @@ DEFAULT_CONFIG = {
         "enabled": True,
         "pollSeconds": 5,
         "retrySeconds": 5,
-        "refundWaitSeconds": 120,
+        "refundWaitSeconds": 600,
         "lateStartBufferMinutes": 5,
     },
     "userId": "current",
@@ -288,12 +288,15 @@ def find_booking_records(value: Any) -> list[dict[str, Any]]:
     return found
 
 
-def _booking_day(value: Any) -> date | None:
-    if not isinstance(value, str) or not value.strip():
+def _booking_day(value: Any, zone: Any = None) -> date | None:
+    if value in (None, ""):
         return None
     try:
-        return datetime.fromisoformat(value.replace("Z", "+00:00")).date()
-    except ValueError:
+        if isinstance(value, (int, float)) or str(value).isdigit():
+            return datetime.fromtimestamp(int(value) / 1000, zone).date()
+        parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        return (parsed.astimezone(zone) if zone and parsed.tzinfo else parsed).date()
+    except (OverflowError, OSError, TypeError, ValueError):
         return None
 
 
@@ -311,12 +314,13 @@ def booking_matches_saved_entry(
     )
     if expected_vehicle and actual_vehicle != expected_vehicle:
         return False
-    return _booking_day(record.get("checkInTime")) == booking_date
+    zone = datetime.fromisoformat(str(body["checkInTime"])).tzinfo if body.get("checkInTime") else None
+    return _booking_day(record.get("checkInTime"), zone) == booking_date
 
 
-def booking_record_day(record: dict[str, Any]) -> date | None:
+def booking_record_day(record: dict[str, Any], zone: Any = None) -> date | None:
     for key in ("checkInTime", "startTime", "bookingDate", "date"):
-        booking_day = _booking_day(record.get(key))
+        booking_day = _booking_day(record.get(key), zone)
         if booking_day is not None:
             return booking_day
     return None
@@ -344,7 +348,8 @@ def select_current_booking(
         if not booking_needs_rebook(record)
         and normalized_status(record.get("status")) not in FINISHED_STATUSES
     ]
-    same_day = [record for record in live if booking_record_day(record) == booking_date]
+    zone = datetime.fromisoformat(str(body["checkInTime"])).tzinfo if body.get("checkInTime") else None
+    same_day = [record for record in live if booking_record_day(record, zone) == booking_date]
     if same_day:
         return same_day[0]
 
@@ -431,7 +436,15 @@ def rebook_options(config: dict[str, Any]) -> tuple[bool, int, int, int]:
 def refund_wait_seconds(config: dict[str, Any]) -> int:
     value = config.get("rebook")
     value = value if isinstance(value, dict) else {}
-    return max(5, int(value.get("refundWaitSeconds", 120)))
+    return max(5, int(value.get("refundWaitSeconds", 600)))
+
+
+def request_retry_seconds(error: Exception, default: int) -> int:
+    """Honor a 429 cooldown; use a conservative minute when none was supplied."""
+    if isinstance(error, ApiError) and error.status == 429:
+        retry_after = error.retry_after if error.retry_after is not None else 60.0
+        return max(default, int(retry_after + 0.999))
+    return default
 
 
 def rebook_deadline(config: dict[str, Any], booking_date: date) -> datetime:
@@ -683,7 +696,7 @@ async def submit(config: dict[str, Any], booking_date: date, dry_run: bool) -> A
 
 
 async def fetch_booking_record(
-    client: GrideeClient, user_id: str, booking_id: str
+    client: GrideeClient, user_id: str, booking_id: str, lot_id: str | None = None
 ) -> dict[str, Any]:
     encoded_user = quote(user_id, safe="")
     encoded_booking = quote(booking_id, safe="")
@@ -700,12 +713,29 @@ async def fetch_booking_record(
         if exc.status != 404:
             raise
 
-    # Cancelled bookings may move out of the live collection immediately.
-    for suffix in ("all/history", "all"):
-        try:
-            result = await client.request(
-                "GET", f"/api/bookings/{encoded_user}/{suffix}"
+    # Cancelled bookings may move out of the live collection immediately. Version
+    # 1.75 added paginated history routes; prefer them before the legacy collections.
+    history_routes: list[tuple[str, dict[str, Any] | None]] = []
+    if lot_id:
+        encoded_lot = quote(lot_id, safe="")
+        history_routes.append(
+            (
+                f"/api/parking-lots/{encoded_lot}/bookings/"
+                f"{encoded_user}/history/page",
+                {"page": 0, "size": 100},
             )
+        )
+    history_routes.extend(
+        [
+            (f"/api/bookings/{encoded_user}/history/page", {"page": 0, "size": 100}),
+            (f"/api/bookings/{encoded_user}/all/history", None),
+            (f"/api/bookings/{encoded_user}/all", None),
+        ]
+    )
+    for path, params in history_routes:
+        try:
+            kwargs = {"params": params} if params else {}
+            result = await client.request("GET", path, **kwargs)
         except ApiError:
             continue
         record = find_booking_record(result, booking_id)
@@ -859,7 +889,12 @@ async def monitor_and_rebook(
         last_reported_status = ""
         while datetime.now().astimezone() < deadline:
             try:
-                record = await fetch_booking_record(client, user_id, booking_id)
+                record = await fetch_booking_record(
+                    client,
+                    user_id,
+                    booking_id,
+                    str(config.get("booking", {}).get("lotId") or "") or None,
+                )
             except Exception as exc:
                 state.update(
                     {
@@ -871,7 +906,7 @@ async def monitor_and_rebook(
                 )
                 write_json(state_path, state)
                 print(f"[!] Booking status check failed: {exc}", flush=True)
-                await asyncio.sleep(poll_seconds)
+                await asyncio.sleep(request_retry_seconds(exc, poll_seconds))
                 continue
 
             current_status = booking_status(record)
@@ -959,7 +994,7 @@ async def monitor_and_rebook(
                 )
                 write_json(state_path, state)
                 print(f"[!] {state['error']}", flush=True)
-                await asyncio.sleep(poll_seconds)
+                await asyncio.sleep(request_retry_seconds(exc, poll_seconds))
                 continue
             if refund is None:
                 wait_limit = refund_wait_seconds(config)
@@ -1038,6 +1073,44 @@ async def monitor_and_rebook(
                     )
                     return state
 
+                # A delayed refund may arrive after the user has booked manually.
+                # Check the live collection before every create attempt, not only
+                # after a 409, and fail closed if that check is unavailable.
+                try:
+                    current = await client.request(
+                        "GET", f"/api/bookings/{quote(user_id, safe='')}/all"
+                    )
+                    existing = select_current_booking(
+                        current, booking_body(config, booking_date), booking_date
+                    )
+                except Exception as exc:
+                    state.update({
+                        "status": "rebook-failed",
+                        "error": f"Current-booking check failed: {exc}",
+                    })
+                    write_json(state_path, state)
+                    print(f"[!] {state['error']}", flush=True)
+                    await asyncio.sleep(request_retry_seconds(exc, retry_seconds))
+                    continue
+                if existing is not None:
+                    booking_id = str(
+                        existing.get("id") or existing.get("_id") or existing.get("bookingId")
+                    )
+                    state.update({
+                        "status": "monitoring",
+                        "bookingId": booking_id,
+                        "bookingStatus": booking_status(existing),
+                        "adoptedExistingAt": datetime.now().astimezone().isoformat(),
+                    })
+                    state.pop("error", None)
+                    write_json(state_path, state)
+                    print(
+                        f"Adopted existing same-day booking {booking_id}; "
+                        "no replacement was created.",
+                        flush=True,
+                    )
+                    last_reported_status = ""
+                    break
                 state["rebookAttempts"] = int(state.get("rebookAttempts", 0)) + 1
                 state["rebookAttemptedAt"] = datetime.now().astimezone().isoformat()
                 try:
@@ -1053,7 +1126,7 @@ async def monitor_and_rebook(
                         state.update({"status": "rebook-failed", "error": str(exc)})
                         write_json(state_path, state)
                         print(f"[!] Rebook attempt failed: {exc}", flush=True)
-                        await asyncio.sleep(retry_seconds)
+                        await asyncio.sleep(request_retry_seconds(exc, retry_seconds))
                         continue
 
                     # A conflict often means the create succeeded but its response
@@ -1075,7 +1148,9 @@ async def monitor_and_rebook(
                         )
                         write_json(state_path, state)
                         print(f"[!] Rebook attempt failed: {state['error']}", flush=True)
-                        await asyncio.sleep(retry_seconds)
+                        await asyncio.sleep(
+                            request_retry_seconds(refresh_exc, retry_seconds)
+                        )
                         continue
 
                     existing = select_current_booking(
@@ -1102,7 +1177,7 @@ async def monitor_and_rebook(
                     state.update({"status": "rebook-failed", "error": str(exc)})
                     write_json(state_path, state)
                     print(f"[!] Rebook attempt failed: {exc}", flush=True)
-                    await asyncio.sleep(retry_seconds)
+                    await asyncio.sleep(request_retry_seconds(exc, retry_seconds))
                     continue
 
                 replacement_id = find_booking_id(result)
@@ -1213,6 +1288,7 @@ async def run_service(config_path: Path, state_path: Path, dry_run: bool) -> Non
             if format_retry:
                 state["formatRetryAttempted"] = True
             write_json(state_path, state)
+        failure: Exception | None = None
         try:
             config = read_booking_config(config_path)
             if resume_monitor:
@@ -1230,6 +1306,7 @@ async def run_service(config_path: Path, state_path: Path, dry_run: bool) -> Non
                 result = await submit(config, attempt_date, dry_run)
                 state["status"] = "dry-run"
         except Exception as exc:
+            failure = exc
             state = read_json(state_path, state)
             if state.get("status") not in {"rebook-failed", "monitor-error"}:
                 state["status"] = "failed"
@@ -1238,6 +1315,10 @@ async def run_service(config_path: Path, state_path: Path, dry_run: bool) -> Non
         write_json(state_path, state)
         if not dry_run and not state.get("bookingId"):
             _, _, retry_seconds, _ = rebook_options(config)
+            retry_seconds = request_retry_seconds(
+                failure or ServiceError("No booking is currently tracked."),
+                retry_seconds,
+            )
             print(
                 f"No booking is currently tracked; checking again in {retry_seconds}s.",
                 flush=True,

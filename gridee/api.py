@@ -17,6 +17,8 @@ DEFAULT_BASE_URL = "https://gridee.onrender.com"
 DEFAULT_FIREBASE_API_KEY = "AIzaSyDN63teqDI3fvPQRY2NUyGbmiCklbLgkls"
 FIREBASE_AUTH_BASE_URL = "https://identitytoolkit.googleapis.com/v1/accounts:"
 FIREBASE_FALLBACK_STATUS_CODES = {401, 404}
+DEFAULT_APP_VERSION = "android/1.75 (83)"
+DEFAULT_USER_AGENT = "okhttp/4.12.0"
 
 
 class ApiError(RuntimeError):
@@ -73,6 +75,9 @@ class ApiClient:
         token: str | None = None,
         token_type: str = "Bearer",
         timeout: float = 30.0,
+        app_version: str | None = None,
+        user_agent: str | None = None,
+        device_id: str | None = None,
     ) -> None:
         parsed = urlparse(base_url)
         if parsed.scheme not in {"http", "https"} or not parsed.netloc:
@@ -81,6 +86,9 @@ class ApiClient:
         self.token = token
         self.token_type = token_type or "Bearer"
         self.timeout = timeout
+        self.app_version = app_version or os.getenv("GRIDEE_APP_VERSION") or DEFAULT_APP_VERSION
+        self.user_agent = user_agent or os.getenv("GRIDEE_USER_AGENT") or DEFAULT_USER_AGENT
+        self.device_id = device_id or os.getenv("GRIDEE_DEVICE_ID")
         self.last_login_response: dict[str, Any] = {}
         self.last_auth_method: str | None = None
 
@@ -105,7 +113,13 @@ class ApiClient:
             separator = "&" if target.query else "?"
             url += separator + urlencode(query_items)
 
-        request_headers = {"Accept": "application/json"}
+        request_headers = {
+            "Accept": "application/json",
+            "User-Agent": self.user_agent,
+            "X-App-Version": self.app_version,
+        }
+        if self.device_id:
+            request_headers["X-Device-Id"] = self.device_id
         if headers:
             request_headers.update(headers)
         if authenticated:

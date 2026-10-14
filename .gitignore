@@ -27,7 +27,11 @@ Thumbs.db
 runtime/
 analysis/*.apk
 analysis/*.jobf
-analysis/*-decompiled/
+analysis/*-decompiled*/
+analysis/*-device/
+analysis/*-dex/
+analysis/*-device.json
+hs_err_pid*.log
 tools/jadx-*/
 tools/jadx-*.zip
 android-helper/build/

@@ -66,7 +66,7 @@ python .\gridee_booking.py --venue "TP Avenue" --execute
 
 ## Live API authentication
 
-The default API origin is `https://gridee.onrender.com`. Login first tries `POST /api/auth/login`. On a 401/404 it follows the Android app's fallback: Firebase email/password sign-in, verified-email lookup, then `POST /api/auth/firebase/exchange`. It saves the returned Gridee token and attaches `Authorization: Bearer <token>` to authenticated calls.
+The default API origin is `https://gridee.onrender.com`. Login first tries `POST /api/auth/login`. On a 401/404 it follows the Android app's fallback: Firebase email/password sign-in, verified-email lookup, then `POST /api/auth/firebase/exchange`. It saves the returned Gridee token and attaches `Authorization: Bearer <token>` to authenticated calls. The aiohttp client also sends the v1.75 Android transport identity (`User-Agent: okhttp/4.12.0` and `X-App-Version: android/1.75 (83)`). This matters because the current backend returns `403 Security Restriction` for booking-list requests made with aiohttp's default Python user agent. `GRIDEE_USER_AGENT`, `GRIDEE_APP_VERSION`, and optional `GRIDEE_DEVICE_ID` override these values.
 
 ### Secure interactive login
 
@@ -212,6 +212,16 @@ It then creates a replacement immediately and monitors the replacement. Failed
 replacement requests retry every five seconds. This resumes safely after a worker
 restart.
 
+The shared HTTP client spaces requests by at least one second and handles HTTP `429`
+without hammering the API. It honors `Retry-After`, `RateLimit-Reset`, and
+`X-RateLimit-Reset`; when the server supplies no delay, idempotent reads use bounded
+exponential cooldowns of 15, 30, 60, and 120 seconds. Booking, payment, and wallet
+POSTs are never automatically replayed by the HTTP layer. Their existing service
+logic receives the cooldown and waits before the next duplicate-safe attempt.
+Optional `.env` overrides are `GRIDEE_MIN_REQUEST_INTERVAL_SECONDS`,
+`GRIDEE_RATE_LIMIT_RETRIES`, `GRIDEE_RATE_LIMIT_BASE_SECONDS`, and
+`GRIDEE_RATE_LIMIT_MAX_SECONDS`.
+
 On startup after `runAt` and before `checkOutTime`, the worker queries
 `GET /api/bookings/{userId}/all` even when the local state file is missing. A
 live booking for that day is adopted and monitored without another create request,
@@ -221,6 +231,9 @@ monitoring it. A `409 Booking conflict` triggers another current-booking lookup 
 adoption. If the server reports a conflict but omits the existing booking ID, create
 attempts are disabled for that day instead of looping every five seconds. If the
 initial lookup itself fails, the worker does not guess or submit blindly.
+For a known booking ID the worker checks the detail endpoint first. If that record has
+moved out of the live collection, it tries the v1.75 paginated history endpoints
+(`.../history/page?page=0&size=100`) before the legacy history/current collections.
 If a saved booking ID is absent from both the live and history endpoints, its status
 is `MISSING`, not `CANCELLED`. The stale ID is discarded immediately and the worker
 runs the same lookup-before-create recovery on the next five-second cycle; it does
@@ -249,7 +262,7 @@ The retry behavior is configured in `booking_service.json`:
   "enabled": true,
   "pollSeconds": 5,
   "retrySeconds": 5,
-  "refundWaitSeconds": 120,
+  "refundWaitSeconds": 600,
   "lateStartBufferMinutes": 5
 }
 ```
@@ -343,7 +356,9 @@ Repeat `--query KEY=VALUE` or `--header KEY=VALUE` as needed. Supported methods 
 
 The current APK-derived endpoint inventory is:
 
-- [Gridee 1.73 generated endpoint audit](docs/ENDPOINTS_1.73.md)
+- [Gridee 1.75 generated endpoint audit](docs/ENDPOINTS_1.75.md)
+- [Gridee 1.75 extraction and compatibility findings](docs/APK_1.75_ANALYSIS.md)
+- [Gridee 1.73 generated endpoint audit](docs/ENDPOINTS_1.73.md) (older reference)
 
 The earlier hand-written v1.71 references are retained for context:
 
@@ -388,16 +403,35 @@ Add `--execute` only when the helper should press final confirmation. With `--da
 
 ## APK analysis notes
 
-The installed-app APK is intentionally not committed to this merged repository. If you
-are authorized to inspect your local copy, place it under `analysis/` (ignored by Git).
-Generate a versioned endpoint report with:
+The installed-app APK is intentionally not committed to this merged repository. With
+an authorized USB-debugging device connected, pull the installed base and split APKs,
+hash them, and record the installed version with:
 
 ```powershell
-python .\tools\gridee_apk_audit.py .\analysis\gridee-1.73-base.apk `
-  --output .\docs\ENDPOINTS_1.73.md
+python .\tools\pull_gridee_apk.py
 
-python .\tools\gridee_apk_audit.py .\analysis\gridee-1.73-base.apk `
-  --format json --output .\analysis\gridee-1.73-endpoints.json
+# Required only when more than one authorized device is attached:
+python .\tools\pull_gridee_apk.py --serial YOUR_ADB_SERIAL
+```
+
+The pull command writes `analysis/gridee-<version>-device/` and a local JSON manifest.
+Add `--audit` to attempt the slower DEX endpoint/model audit. APKs, decompiled trees,
+device paths, and crash logs remain ignored by Git.
+
+For an obfuscated build such as v1.75, decompile the main DEX with JADX and feed the
+resulting Retrofit interface to the audit parser:
+
+```powershell
+$env:JAVA_OPTS = "-Xms128M -Xmx1024M -XX:+UseSerialGC"
+.\tools\jadx-1.5.6\bin\jadx.bat -j 1 --no-res --show-bad-code `
+  -d .\analysis\gridee-1.75-decompiled `
+  .\analysis\gridee-1.75-dex\classes.dex
+
+python .\tools\gridee_apk_audit.py .\analysis\gridee-1.75-device\base.apk `
+  --api-class mf.c `
+  --jadx-source .\analysis\gridee-1.75-decompiled\sources\mf\c.java `
+  --application-id com.gridee.parking --version-name 1.75 --version-code 83 `
+  --output .\docs\ENDPOINTS_1.75.md
 ```
 
 The tool reads the manifest version and extracts Retrofit method/path/query/body
@@ -410,7 +444,7 @@ The captured non-secret UI hierarchy used for parser regression testing remains 
 
 ## Configuration
 
-ADB defaults can be supplied with `GRIDEE_DEVICE`, `GRIDEE_PACKAGE`, `GRIDEE_ACTIVITY`, `GRIDEE_ADB`, and `GRIDEE_OUTPUT`. API defaults use `GRIDEE_BASE_URL`, `GRIDEE_SESSION_FILE`, `GRIDEE_TOKEN`, `GRIDEE_TOKEN_TYPE`, `GRIDEE_EMAIL`, `GRIDEE_PASSWORD`, and `GRIDEE_FIREBASE_API_KEY`.
+ADB defaults can be supplied with `GRIDEE_DEVICE`, `GRIDEE_PACKAGE`, `GRIDEE_ACTIVITY`, `GRIDEE_ADB`, and `GRIDEE_OUTPUT`. API defaults use `GRIDEE_BASE_URL`, `GRIDEE_SESSION_FILE`, `GRIDEE_TOKEN`, `GRIDEE_TOKEN_TYPE`, `GRIDEE_EMAIL`, `GRIDEE_PASSWORD`, `GRIDEE_FIREBASE_API_KEY`, `GRIDEE_APP_VERSION`, `GRIDEE_USER_AGENT`, and `GRIDEE_DEVICE_ID`.
 
 Run command-specific help for the complete option list:
 

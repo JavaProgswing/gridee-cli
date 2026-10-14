@@ -24,6 +24,7 @@ from gridee_booking_service import (
     rebook_deadline,
     read_booking_config,
     replacement_booking_body,
+    request_retry_seconds,
     render,
     should_recover_booking,
     should_resume_monitoring,
@@ -42,7 +43,7 @@ def test_client_forces_system_dns_resolver(monkeypatch):
 
     class FakeClientSession:
         def __init__(self, **kwargs):
-            self.headers = {}
+            self.headers = dict(kwargs.get("headers") or {})
             connector_calls.append(kwargs)
 
         async def close(self):
@@ -65,6 +66,86 @@ def test_client_forces_system_dns_resolver(monkeypatch):
         "connector",
         {"resolver": threaded_resolver},
     )
+    assert connector_calls[0]["headers"] == {
+        "User-Agent": "okhttp/4.12.0",
+        "X-App-Version": "android/1.75 (83)",
+    }
+
+
+def test_client_supports_device_and_version_header_overrides(monkeypatch):
+    monkeypatch.setenv("GRIDEE_USER_AGENT", "custom-agent")
+    client = GrideeClient(
+        "person@example.com",
+        "secret",
+        app_version="android/1.76 (84)",
+        device_id="device-123",
+    )
+    assert client.app_headers() == {
+        "User-Agent": "custom-agent",
+        "X-App-Version": "android/1.76 (84)",
+        "X-Device-Id": "device-123",
+    }
+
+
+def test_retry_after_parses_seconds_date_reset_and_body():
+    now = datetime(2026, 10, 7, 12, 0, tzinfo=timezone.utc)
+    assert api.retry_after_seconds({"Retry-After": "45"}, {}, now) == 45
+    assert api.retry_after_seconds(
+        {"Retry-After": "Wed, 07 Oct 2026 12:02:00 GMT"}, {}, now
+    ) == 120
+    assert api.retry_after_seconds(
+        {"X-RateLimit-Reset": str(int(now.timestamp()) + 90)}, {}, now
+    ) == 90
+    assert api.retry_after_seconds({}, {"retryAfterSeconds": 30}, now) == 30
+
+
+def test_get_retries_429_but_post_is_not_replayed(monkeypatch):
+    calls = []
+    sleeps = []
+
+    async def fake_sleep(seconds):
+        sleeps.append(seconds)
+
+    async def fake_json(session, method, url, **kwargs):
+        calls.append(method)
+        if len(calls) == 1:
+            raise ApiError("rate limited", 429, retry_after=12)
+        return {"ok": True}
+
+    monkeypatch.setattr(api.asyncio, "sleep", fake_sleep)
+    monkeypatch.setattr(api, "_json", fake_json)
+    client = GrideeClient(
+        "person@example.com",
+        "secret",
+        min_request_interval=0,
+        rate_limit_retries=1,
+    )
+    client.session = FakeSession()  # type: ignore[assignment]
+    assert asyncio.run(client.request("GET", "/api/test")) == {"ok": True}
+    assert calls == ["GET", "GET"]
+    assert sleeps and sleeps[0] >= 12
+
+    calls.clear()
+    sleeps.clear()
+    client._request_lock = None
+    client._rate_limited_until = 0
+    client._next_request_at = 0
+
+    async def always_limited(session, method, url, **kwargs):
+        calls.append(method)
+        raise ApiError("rate limited", 429, retry_after=20)
+
+    monkeypatch.setattr(api, "_json", always_limited)
+    with pytest.raises(ApiError) as caught:
+        asyncio.run(client.request("POST", "/api/test"))
+    assert calls == ["POST"]
+    assert caught.value.retry_after == 20
+
+
+def test_service_uses_rate_limit_delay_over_five_second_retry():
+    assert request_retry_seconds(ApiError("limited", 429, retry_after=37.2), 5) == 38
+    assert request_retry_seconds(ApiError("limited", 429), 5) == 60
+    assert request_retry_seconds(ApiError("server", 500), 5) == 5
 
 
 def test_client_falls_back_to_firebase(monkeypatch):
@@ -112,6 +193,32 @@ def test_http_error_names_safe_endpoint():
 
     with pytest.raises(ApiError, match=r"POST /api/oauth2/user -> HTTP 500"):
         asyncio.run(api._json(Session(), "POST", "https://example.com/api/oauth2/user"))
+
+
+def test_missing_booking_uses_175_paginated_history_first():
+    calls = []
+
+    class Client:
+        async def request(self, method, path, **kwargs):
+            calls.append((method, path, kwargs))
+            if path.endswith("/booking-1"):
+                raise ApiError("missing", 404)
+            if path.endswith("/history/page"):
+                return {"items": [{"id": "booking-1", "status": "CANCELLED"}]}
+            raise AssertionError(path)
+
+    record = asyncio.run(
+        service.fetch_booking_record(Client(), "user-1", "booking-1", "lot-1")
+    )
+    assert record["status"] == "CANCELLED"
+    assert calls == [
+        ("GET", "/api/bookings/user-1/booking-1", {}),
+        (
+            "GET",
+            "/api/parking-lots/lot-1/bookings/user-1/history/page",
+            {"params": {"page": 0, "size": 100}},
+        ),
+    ]
 
 
 def test_client_rejects_backslash_email_and_cross_origin():
@@ -184,7 +291,7 @@ def test_partial_booking_config_fills_missing_defaults(tmp_path):
     assert config["booking"]["vehicleNumber"] == "BR01BK2363"
     assert config["booking"]["checkInTime"] == "{date}T08:00:00{offset}"
     assert config["booking"]["checkOutTime"] == "{date}T17:00:00{offset}"
-    assert config["rebook"]["refundWaitSeconds"] == 120
+    assert config["rebook"]["refundWaitSeconds"] == 600
 
 
 def test_next_due_uses_grace_and_at_most_once():
@@ -402,6 +509,8 @@ def test_cancelled_booking_is_rebooked_and_replacement_is_monitored(
                     "lotId": "lot-1",
                     "status": "CANCELLED",
                 }
+            if path.endswith("/all"):
+                return {"items": []}
             return {
                 "id": "replacement-2",
                 "lotId": "lot-1",
@@ -490,6 +599,8 @@ def test_rebook_409_adopts_existing_booking(monkeypatch, tmp_path):
             if method == "POST":
                 raise ApiError("Booking conflict", 409)
             if path.endswith("/all"):
+                if sum(p.endswith("/all") for _, p in calls) == 1:
+                    return {"items": []}
                 return {
                     "items": [
                         {
@@ -542,6 +653,83 @@ def test_rebook_409_adopts_existing_booking(monkeypatch, tmp_path):
     assert sum(method == "POST" for method, _ in calls) == 1
     assert ("GET", "/api/bookings/user-1/all") in calls
 
+
+def test_delayed_refund_adopts_manual_booking_without_duplicate(monkeypatch, tmp_path):
+    tz = timezone(timedelta(hours=5, minutes=30))
+
+    class Clock(datetime):
+        current = datetime(2026, 9, 14, 10, 0, tzinfo=tz)
+
+        @classmethod
+        def now(cls, tz=None):
+            return cls.current
+
+    calls = []
+    manual_time = datetime(2026, 9, 14, 10, 3, tzinfo=tz)
+    tomorrow_time = manual_time + timedelta(days=1)
+
+    class Client:
+        user = {}
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *_):
+            pass
+
+        async def request(self, method, path, **kwargs):
+            calls.append((method, path))
+            if path.endswith("/cancelled-1"):
+                return {"id": "cancelled-1", "status": "CANCELLED"}
+            if path.endswith("/wallet/transactions"):
+                if Clock.current < datetime(2026, 9, 14, 10, 3, 40, tzinfo=tz):
+                    return {"content": []}
+                return {"content": [{
+                    "id": "late-refund", "bookingId": "cancelled-1",
+                    "type": "BOOKING_REFUND", "status": "completed",
+                }]}
+            if path.endswith("/all"):
+                return {"items": [
+                    {"id": "future-booking", "status": "CONFIRMED",
+                     "checkInTime": int(tomorrow_time.timestamp() * 1000)},
+                    {"id": "manual-booking", "status": "CONFIRMED",
+                     "checkInTime": int(manual_time.timestamp() * 1000)},
+                ]}
+            if path.endswith("/manual-booking"):
+                return {"id": "manual-booking", "status": "ACTIVE"}
+            raise AssertionError((method, path))
+
+    async def advance(seconds):
+        Clock.current += timedelta(seconds=seconds)
+
+    config = {
+        "userId": "user-1",
+        "rebook": {"enabled": True, "pollSeconds": 5,
+                   "retrySeconds": 5, "refundWaitSeconds": 600},
+        "booking": {
+            "spotId": "spot-1", "lotId": "lot-1",
+            "checkInTime": "{date}T08:00:00+05:30",
+            "checkOutTime": "{date}T17:00:00+05:30",
+            "vehicleNumber": "KA01AA0001",
+        },
+    }
+    state = {"lastAttemptDate": "2026-09-14", "bookingId": "cancelled-1",
+             "status": "submitted"}
+    monkeypatch.setattr(service, "datetime", Clock)
+    monkeypatch.setattr(service.asyncio, "sleep", advance)
+    monkeypatch.setattr(service, "GrideeClient", lambda *args, **kwargs: Client())
+    monkeypatch.setenv("GRIDEE_EMAIL", "person@example.com")
+    monkeypatch.setenv("GRIDEE_PASSWORD", "secret")
+
+    result = asyncio.run(service.monitor_and_rebook(
+        config, date(2026, 9, 14), tmp_path / "state.json", state
+    ))
+
+    assert result["status"] == "booking-started"
+    assert result["bookingId"] == "manual-booking"
+    assert result["refundTransactionId"] == "late-refund"
+    assert "rebookAttempts" not in result
+    assert not any(method == "POST" for method, _ in calls)
 
 def test_rebook_stops_once_rounded_start_reaches_checkout(monkeypatch, tmp_path):
     tz = timezone(timedelta(hours=5, minutes=30))
